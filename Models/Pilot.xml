@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<PropertyList>
+
+<path>Pilot.ac</path>
+
+<animation>
+<type>noshadow</type>
+<object-name>lunettes</object-name>
+</animation>
+
+</PropertyList>
