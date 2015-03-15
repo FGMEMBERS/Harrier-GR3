@@ -60,9 +60,9 @@
 <object-name>lampetest</object-name>
 <object-name>lampesil</object-name>
 <emission>
-<red>   0.50 </red>
-<green> 0.25 </green>
-<blue>  0.25 </blue>
+<red>0.6</red>
+<green>0.3</green>
+<blue>0.3</blue>
 <factor-prop>/systems/electrical/outputs/instrument-lights</factor-prop>
 </emission>
 </animation>

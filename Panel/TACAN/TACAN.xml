@@ -4,6 +4,21 @@
 <path>TACAN.ac</path>
 
 <animation>
+<type>material</type>
+<object-name>mount</object-name>
+<object-name>drum-1</object-name>
+<object-name>drum-2</object-name>
+<object-name>drum-3</object-name>
+<object-name>X-sign</object-name>
+<emission>
+<red>0.6</red>
+<green>0.3</green>
+<blue>0.3</blue>
+<factor-prop>/systems/electrical/outputs/instrument-lights</factor-prop>
+</emission>
+</animation>
+
+<animation>
 <type>textranslate</type>
 <object-name>drum-3</object-name>
 <property>instrumentation/tacan/frequencies/selected-channel[3]</property>

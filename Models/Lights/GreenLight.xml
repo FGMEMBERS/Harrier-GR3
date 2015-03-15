@@ -1,20 +1,27 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <PropertyList>
 
-<path>GreenLight.ac</path>
+  <model>
+    <name>GreenLightFlare</name>
+    <path>Aircraft/Harrier-GR3/Models/Lights/Flares/GreenLight-flare.xml</path>
+  </model>
 
-<animation>
-<type>select</type>
-<object-name>Light</object-name>
-<condition>
-<property>/controls/lighting/nav-lights</property>
-</condition>
-</animation>
+  <model>
+    <name>GreenLightRemb</name>
+    <path>Aircraft/Harrier-GR3/Models/Lights/Rembrandt/GreenLight-remb.xml</path>
+  </model>
 
-<animation>
-<type>noshadow</type>
-<object-name>Light</object-name>
-</animation>
+  <animation>
+    <type>select</type>
+    <object-name>GreenLightFlare</object-name>
+    <object-name>GreenLightRemb</object-name>
+    <condition>
+      <and>
+        <property>lightpack/nav-lights-intensity</property>
+        <not><property>sim/crashed</property></not>
+      </and>
+    </condition>
+  </animation>
 
 </PropertyList>

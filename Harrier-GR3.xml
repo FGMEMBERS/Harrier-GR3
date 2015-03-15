@@ -1,5 +1,5 @@
 <!-- Original Harrier FDM is made by Andy Ross
-Hawker Siddeley Harrier GR.1 modifications by Petar Jedvaj
+Hawker Siddeley Harrier GR3 modifications by Petar Jedvaj and Stuart Cassie
 January 25, 2012 -->
 
 <airplane mass="14052">
@@ -35,12 +35,12 @@ January 25, 2012 -->
   <control-input axis="/controls/flight/flaps" control="FLAP0"/>
   <control-input axis="/controls/flight/aileron" control="FLAP1" split="true"/>
   <control-input axis="/controls/flight/aileron-trim" control="FLAP1" split="true"/>
-  <control-output control="SPOILER" prop="/surface-positions/speedbrake-pos-norm"/>  
+  <control-output control="SPOILER" prop="/surface-positions/speedbrake-pos-norm"/>
   <control-output control="FLAP0" prop="/surface-positions/flap-pos-norm"/>
   <control-output control="FLAP1" side="left"
-		  prop="/surface-positions/left-aileron-pos-norm"/>
+          prop="/surface-positions/left-aileron-pos-norm"/>
   <control-output control="FLAP1" side="right"
-		  prop="/surface-positions/right-aileron-pos-norm"/>
+          prop="/surface-positions/right-aileron-pos-norm"/>
 </wing>
 
 <hstab x="-12.23" y="0.00" z="0.93" length="2.04" chord="1.48"
@@ -59,7 +59,7 @@ January 25, 2012 -->
   <control-input axis="/controls/flight/rudder" control="FLAP0" invert="true"/>
   <control-input axis="/controls/flight/rudder-trim" control="FLAP0" invert="true"/>
   <control-output control="FLAP0" prop="/surface-positions/rudder-pos-norm"
-		  min="1" max="-1"/>
+          min="1" max="-1"/>
 </vstab>
 
 <jet x="-6.12" y="0" z="0.56" mass="3000" thrust="21500" rotate="-99">
@@ -77,7 +77,7 @@ January 25, 2012 -->
      anyone can find better info. -->
 
 <!-- tail jets: left yaw, right yaw and pitch down -->
-<!-- old values 
+<!-- old values
 <thruster x="-15" y="0" z="1" vx="0" vy="1" vz="0" thrust="200">
   <control-input axis="/controls/flight/rudder" control="THROTTLE"
            src0="0" src1="1" dst0="0" dst1="1"/>
@@ -103,7 +103,7 @@ January 25, 2012 -->
            src0="-1" src1="0" dst0="1" dst1="0"/>
   <control-input axis="/orientation/yaw-rate-degps" control="THROTTLE"
            src0="0" src1="5" dst0="0" dst1="0.3"/>
-</thruster>		   
+</thruster>
 
 <thruster x="-15" y="0" z="1" vx="0" vy="0" vz="1" thrust="200">
   <control-input axis="/controls/flight/elevator" control="THROTTLE"
@@ -186,7 +186,7 @@ January 25, 2012 -->
 
 <!-- Two 100 gallon (imperial, not US, one assumes) tanks on the
      inboard pylons -->
-	 
+
 <tank x="-7.32" y="1.8" z="-0.40" jet="true" capacity="816"/>
 <tank x="-7.32" y="-1.8" z="-0.40" jet="true" capacity="816"/>
 
