@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<PropertyList>
+
+    <!-- FuelBoom -->
+    <model>
+        <name>LTank</name>
+        <path>Aircraft/Harrier-GR3/Models/FuelBoom.ac</path>
+        <offsets>
+            <x-m>0</x-m>
+            <y-m>0</y-m>
+            <z-m>0</z-m>
+            <pitch-deg>0</pitch-deg>
+        </offsets>
+    </model>
+
+</PropertyList>

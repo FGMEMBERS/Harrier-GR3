@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<PropertyList>
+
+    <sim>
+        <model>
+            <livery>
+                <name type="string">Royal Air Force XZ969</name>
+                <texture>Liveries/Green.png</texture>
+            </livery>
+            <livery-logo>
+                <texture>Liveries/Green.png</texture>
+            </livery-logo>
+        </model>
+    </sim>
+
+</PropertyList>
+

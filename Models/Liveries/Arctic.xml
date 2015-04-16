@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<PropertyList>
+
+    <sim>
+        <model>
+            <livery>
+                <name type="string">Royal Air Force XW769</name>
+                <texture>Liveries/Arctic.png</texture>
+            </livery>
+            <livery-logo>
+                <texture>Liveries/Arctic.png</texture>
+            </livery-logo>
+        </model>
+    </sim>
+
+</PropertyList>
+
