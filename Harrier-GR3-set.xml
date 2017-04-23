@@ -6,6 +6,24 @@
 
         <!-- Info -->
         <description>Hawker Siddeley Harrier GR3</description>
+        <long-description>The Hawker Siddeley Harrier, developed in the 1960s, was the
+    			first of the Harrier Jump Jet series of aircraft. It was the first
+    			operational close-support and reconnaissance fighter aircraft with
+    			vertical/short takeoff and landing (V/STOL) capabilities and the only
+    			truly successful V/STOL design of the many that arose in that era.</long-description>
+        <tags>
+            <tag>fighter</tag>
+            <tag>1970s</tag>
+            <tag>1980s</tag>
+            <tag>1990s</tag>
+            <tag>high-wing</tag>
+            <tag>retractable-gear</tag>
+            <tag>stol</tag>
+            <tag>vtol</tag>
+            <tag>jet</tag>
+            <tag>refuel</tag>
+            <tag>single-engine</tag>
+        </tags>
         <author>Petar Jedvaj, Andy Ross, Gary Brown, StuartC, Raptor and Brendan Black</author>
         <status>0.3</status>
         <rating>
