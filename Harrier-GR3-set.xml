@@ -44,6 +44,7 @@
         <!-- Models -->
         <model>
             <path>Aircraft/Harrier-GR3/Models/Harrier-GR3.xml</path>
+            <fallback-model-index type="int">502</fallback-model-index>
         </model>
 
         <submodels>
