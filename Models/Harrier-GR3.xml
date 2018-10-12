@@ -712,18 +712,17 @@
         <object-name>FrontTire</object-name>
         <object-name>FrontLowerStrut</object-name>
         <object-name>FrontMiddleStrut</object-name>
-        <property>gear/gear[0]/caster-angle-deg[0]</property>
-        <factor>-1</factor>
-        <offset-deg>0</offset-deg>
+        <property>surface-positions/rudder-pos-norm</property>
+        <factor>80</factor>
         <center>
             <x-m>-14.45</x-m>
             <y-m>0</y-m>
             <z-m>-6.41</z-m>
         </center>
         <axis>
-            <x>90</x>
+            <x>-1</x>
             <y>0</y>
-            <z>-25</z>
+            <z>0</z>
         </axis>
     </animation>
 
@@ -798,7 +797,7 @@
     <animation>
         <type>rotate</type>
         <object-name>Rudder</object-name>
-        <property>controls/flight/rudder[0]</property>
+        <property>surface-positions/rudder-pos-norm</property>
         <factor>30</factor>
         <offset-deg>0</offset-deg>
         <axis>
