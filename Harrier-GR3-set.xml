@@ -132,6 +132,12 @@
             </config>
         </view>
 
+        <view n="7">
+            <config>
+                <target-z-offset-m archive="y">7.8</target-z-offset-m>
+            </config>
+        </view>
+
         <view n="100">
             <name>Camera pod</name>
             <type>lookfrom</type>

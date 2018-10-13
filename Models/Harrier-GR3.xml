@@ -445,7 +445,7 @@
         <type>translate</type>
         <object-name>Canopy Glass</object-name>
         <object-name>Canopy Arch</object-name>
-        <property>/canopy/position-norm</property>
+        <property>canopy/position-norm</property>
         <factor>0.7</factor>
         <axis>
             <x1-m>-15.46</x1-m>
@@ -720,9 +720,9 @@
             <z-m>-6.41</z-m>
         </center>
         <axis>
-            <x>-1</x>
+            <x>-90</x>
             <y>0</y>
-            <z>0</z>
+            <z>25</z>
         </axis>
     </animation>
 
@@ -898,7 +898,7 @@
         <type>rotate</type>
         <object-name>LFNozzle</object-name>
         <object-name>RFNozzle</object-name>
-        <property>/controls/engines/engine/mixture</property>
+        <property>controls/engines/engine/mixture</property>
         <factor>-100</factor>
         <offset-deg>98</offset-deg>
         <center>
@@ -917,7 +917,7 @@
         <type>rotate</type>
         <object-name>LRNozzle</object-name>
         <object-name>RRNozzle</object-name>
-        <property>/controls/engines/engine/mixture</property>
+        <property>controls/engines/engine/mixture</property>
         <factor>-100</factor>
         <offset-deg>98</offset-deg>
         <center>
@@ -958,7 +958,7 @@
         <object-name>Intake</object-name>
         <condition>
             <greater-than>
-                <property>/controls/engines/engine/mixture</property>
+                <property>controls/engines/engine/mixture</property>
                 <value>0.7</value>
             </greater-than>
         </condition>
