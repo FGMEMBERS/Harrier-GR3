@@ -170,7 +170,7 @@
 	<label>
 		<name>KIAS</name>
 		<x>-65</x>
-		<y>22</y>
+		<y>16</y>
 		<width>25</width>
 		<height>10</height>
 		<input>

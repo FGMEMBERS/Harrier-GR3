@@ -194,6 +194,10 @@
                 <desc>Thrust Vector</desc>
             </key>
             <key>
+                <name>Alt-m</name>
+                <desc>Thrust Vector Hover Stop</desc>
+            </key>
+            <key>
                 <name>j/k</name>
                 <desc>Air Brake</desc>
             </key>
@@ -437,6 +441,20 @@
                     <command>nasal</command>
                     <script>engines.engine1.autostart();</script>
                 </binding>
+            </key>
+
+            <!-- Alt-m moves thrust vector (aka mixture) to hover stop, 82 deg. -->
+            <key n="109">
+                <mod-alt>
+                    <name>Alt-m</name>
+                    <desc>Hover stop</desc>
+                    <binding>
+                        <command>property-interpolate</command>
+                        <property>controls/engines/engine/mixture</property>
+                        <value>0.18</value>
+                        <time>1.0</time>
+                    </binding>
+                </mod-alt>
             </key>
 
         </keyboard>
