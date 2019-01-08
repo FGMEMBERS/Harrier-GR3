@@ -41,7 +41,7 @@
         <engine>
             <name>Engine Exhaust</name>
             <mode>looped</mode>
-            <path>Aircraft/Harrier-GR3/Sound/Whine.wav</path>
+            <path>Aircraft/Harrier-GR3/Sounds/Whine.wav</path>
             <condition>
                 <property>engines/engine/running</property>
                 <not>
@@ -117,7 +117,7 @@
         <flyby>
             <name>fly-by</name>
             <mode>once</mode>
-            <path>Aircraft/Harrier-GR3/Sound/Fly-By.wav</path>
+            <path>Aircraft/Harrier-GR3/Sounds/Fly-By.wav</path>
             <condition>
                 <and>
                     <greater-than>

@@ -230,6 +230,47 @@
                 <name>q</name>
                 <desc>Flares</desc>
             </key>
+            
+            <key>
+                <name>Alt-1</name>
+                <desc>Auto-hover descent rate 4 fps</desc>
+            </key>
+            <key>
+                <name>Alt-2</name>
+                <desc>Auto-hover descent rate 3 fps</desc>
+            </key>
+            <key>
+                <name>Alt-3</name>
+                <desc>Auto-hover descent rate 2 fps</desc>
+            </key>
+            <key>
+                <name>Alt-4</name>
+                <desc>Auto-hover descent rate 1 fps</desc>
+            </key>
+            <key>
+                <name>Alt-5</name>
+                <desc>Auto-hover maintain current altitude</desc>
+            </key>
+            <key>
+                <name>Alt-6</name>
+                <desc>Auto-hover ascent rate 1 fps</desc>
+            </key>
+            <key>
+                <name>Alt-7</name>
+                <desc>Auto-hover ascent rate 2 fps</desc>
+            </key>
+            <key>
+                <name>Alt-8</name>
+                <desc>Auto-hover ascent rate 3 fps</desc>
+            </key>
+            <key>
+                <name>Alt-9</name>
+                <desc>Auto-hover ascent rate 4 fps</desc>
+            </key>
+            <key>
+                <name>Alt-0</name>
+                <desc>Auto-hover off</desc>
+            </key>
 
         </help>
 
@@ -454,6 +495,118 @@
                         <property>controls/engines/engine/mixture</property>
                         <value>0.18</value>
                         <time>1.0</time>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <!-- Alt-0-9 control auto-hover. -->
+            <key n="48">
+                <name>Alt-0</name>
+                <desc>Auto-hover off</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>999</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="49">
+                <name>Alt-1</name>
+                <desc>Auto-hover speed -4 fps</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>-4</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="50">
+                <name>Alt-2</name>
+                <desc>Auto-hover speed -3 fps</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>-3</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="51">
+                <name>Alt-3</name>
+                <desc>Auto-hover speed -2 fps</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>-2</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="52">
+                <name>Alt-4</name>
+                <desc>Auto-hover speed -1 fps</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>-1</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="53">
+                <name>Alt-5</name>
+                <desc>Auto-hover maintain current height</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>0</value>
+                    </binding>
+                </mod-alt>
+            </key>
+           <key n="54">
+                <name>Alt-6</name>
+                <desc>Auto-hover speed +1 fps</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>1</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="55">
+                <name>Alt-7</name>
+                <desc>Auto-hover speed +2 fps</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>2</value>
+                    </binding>
+                </mod-alt>
+            </key>
+             <key n="56">
+                <name>Alt-8</name>
+                <desc>Auto-hover speed +3 fps</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>3</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="57">
+                <name>Alt-9</name>
+                <desc>Auto-hover speed +4 fps</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/flight/auto-hover</property>
+                        <value>4</value>
                     </binding>
                 </mod-alt>
             </key>
