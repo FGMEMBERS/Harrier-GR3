@@ -148,7 +148,7 @@ January 25, 2012 -->
 
 
 <!-- Forward main -->
-<gear x="-4.91" y="0.00" z="-2.0" compression="0.75" spring="3.0" damp="3.0">
+<gear x="-4.91" y="0.00" z="-2.0" compression="0.75" spring="3.0" damp="3.0" stiction="1">
   <control-input axis="/controls/flight/rudder" control="STEER" square="true"/>
   <control-input axis="/controls/gear/brake-left" control="BRAKE"/>
   <control-input axis="/controls/gear/brake-parking" control="BRAKE"/>
@@ -158,7 +158,7 @@ January 25, 2012 -->
 </gear>
 
 <!-- Rear main -->
-<gear x="-8.25" y="0.00" z="-1.5" compression="0.25" spring="1.0" damp="3.0">
+<gear x="-8.25" y="0.00" z="-1.5" compression="0.25" spring="1.0" damp="3.0" stiction="1">
   <control-input axis="/controls/gear/brake-left" control="BRAKE"/>
   <control-input axis="/controls/gear/brake-parking" control="BRAKE"/>
   <control-input axis="/controls/gear/gear-down" control="EXTEND"/>
@@ -167,13 +167,13 @@ January 25, 2012 -->
 </gear>
 
 <!-- Wingtip gear -->
-<gear x="-8.90" y="3.24"  z="-1.41" compression="0.25" spring="0.3" castering="1" damp="1.0">
+<gear x="-8.90" y="3.24"  z="-1.41" compression="0.25" spring="0.3" castering="1" damp="1.0" stiction="1">
   <control-input axis="/controls/gear/gear-down" control="EXTEND"/>
   <control-output control="EXTEND" prop="/gear/gear[2]/position-norm"/>
   <control-speed control="EXTEND" transition-time="7"/>
 </gear>
 
-<gear x="-8.90" y="-3.24" z="-1.41" compression="0.25" spring="0.3" castering="1" damp="1.0">
+<gear x="-8.90" y="-3.24" z="-1.41" compression="0.25" spring="0.3" castering="1" damp="1.0" stiction="1">
   <control-input axis="/controls/gear/gear-down" control="EXTEND"/>
   <control-output control="EXTEND" prop="/gear/gear[3]/position-norm"/>
   <control-speed control="EXTEND" transition-time="7"/>
