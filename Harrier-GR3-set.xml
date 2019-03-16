@@ -25,6 +25,7 @@
             <tag>single-engine</tag>
         </tags>
         <author>Petar Jedvaj, Andy Ross, Gary Brown, StuartC, Raptor, Brendan Black, Julian Smith</author>
+        <aircraft-version>3.0</aircraft-version>
         <status>beta</status>
         <rating>
             <FDM type="int">4</FDM>
@@ -348,6 +349,14 @@
             <selected>none</selected>
             <opt><name>none</name><lbs>0</lbs></opt>
             <opt><name>Matra 155 SNEB 18x68mm Rocket Pack</name><lbs>700</lbs></opt>
+        </weight>
+
+        <weight n="7">
+            <name>Refueling probe</name>
+            <weight-lb>0</weight-lb>
+            <selected>none</selected>
+            <opt><name>none</name><lbs>0</lbs></opt>
+            <opt><name>Probe installed</name><lbs>35</lbs></opt>
         </weight>
 
         <!-- Game Multiplayer -->

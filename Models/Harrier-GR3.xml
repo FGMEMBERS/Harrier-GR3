@@ -9,10 +9,33 @@
       <load>
         <![CDATA[
 var r = cmdarg();
+print ("Harrier-GR3 loading for remote pilot " ~ r.getNode ("sim/multiplay/callsign").getValue());
+var livery_update = aircraft.livery_update.new("Aircraft/Harrier-GR3/Models/Liveries");
 r.initNode ("controls/eject", 0, "BOOL");
 r.getNode ("controls/eject").alias (r.getNode ("sim/multiplay/generic/bool[0]"));
+
+var weight = [];
+foreach (var w; r.getNode ("sim").getChildren ("weight")) {
+   # build a reversed list of weight nodes as we decode the variant in reverse order
+   weight = [ w.getNode ("selected") ] ~ weight;
+}
+
+# Decode sim/model/variant into sim/weight[*]/selected
+variant_decoder = maketimer (1.0, func () {
+  var v = r.getNode("sim/model/variant").getValue();
+  foreach (var s; weight) {
+    s.setValue (math.mod (v, 2) == 0 ? "none" : "selected");
+    v = int (v/2);
+  }
+});
+variant_decoder.start();
         ]]>
       </load>
+      <unload><![CDATA[
+        print ("Harrier-GR3 unloading for remote pilot " ~ r.getNode ("sim/multiplay/callsign").getValue ());
+livery_update.stop();
+variant_decoder.stop();
+      ]]></unload>
     </nasal>
     
     <offsets>
@@ -346,16 +369,6 @@ r.getNode ("controls/eject").alias (r.getNode ("sim/multiplay/generic/bool[0]"))
         <object-name>HUDGlass</object-name>
     </animation>
 
-    <!-- Liveries -->
-    <nasal>
-        <load>
-            var livery_update = aircraft.livery_update.new("Aircraft/Harrier-GR3/Models/Liveries");
-        </load>
-        <unload>
-            livery_update.stop();
-        </unload>
-    </nasal>
-
     <animation>
         <type>material</type>
         <object-name>Fuselage</object-name>
@@ -418,6 +431,14 @@ r.getNode ("controls/eject").alias (r.getNode ("sim/multiplay/generic/bool[0]"))
 
     <model>
         <path>Aircraft/Harrier-GR3/Models/FuelBoom.xml</path>
+        <condition>
+            <not>
+                <equals>
+                    <property>sim/weight[7]/selected</property>
+                    <value>none</value>
+                </equals>
+            </not>
+        </condition>
     </model>
 
     <model>

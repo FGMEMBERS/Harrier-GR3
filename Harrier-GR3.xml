@@ -2,7 +2,7 @@
 Hawker Siddeley Harrier GR3 modifications by Petar Jedvaj and Stuart Cassie
 January 25, 2012 -->
 
-<airplane mass="14052">
+<airplane mass="14052" version="YASIM_VERSION_CURRENT">
 
 <!-- Approach configuration -->
 <approach speed="135" aoa="8" fuel="0.1">
