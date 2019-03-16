@@ -56,14 +56,10 @@ variant_decoder.stop();
     <effect>
         <inherits-from>Effects/model-transparent</inherits-from>
         <condition>
-            <greater-than>
-                <property>sim/multiplay/generic/float[6]</property>
-                <value>9</value>
-            </greater-than>
             <property>/sim/rendering/rembrandt/enabled</property>
-        	</condition>
-            <object-name>Canopy Glass</object-name>
-            <object-name>Front Glass</object-name>
+        </condition>
+        <object-name>Canopy Glass</object-name>
+        <object-name>Front Glass</object-name>
     </effect>
 
     <!-- Parts invisible from internally -->

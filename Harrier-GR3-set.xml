@@ -24,8 +24,8 @@
             <tag>refuel</tag>
             <tag>single-engine</tag>
         </tags>
-        <author>Petar Jedvaj, Andy Ross, Gary Brown, StuartC, Raptor, Brendan Black, Julian Smith</author>
-        <aircraft-version>3.0</aircraft-version>
+        <author>Petar Jedvaj, Andy Ross, Gary Brown, StuartC, Raptor, Brendan Black, Julian Smith, Ludovic Brenta</author>
+        <aircraft-version>3.0.1</aircraft-version>
         <status>beta</status>
         <rating>
             <FDM type="int">4</FDM>

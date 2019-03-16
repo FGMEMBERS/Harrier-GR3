@@ -9,13 +9,9 @@
     <effect>
         <inherits-from>Effects/model-transparent</inherits-from>
         <condition>
-            <greater-than>
-                <property>sim/multiplay/generic/float[6]</property>
-                <value>9</value>
-            </greater-than>
             <property>/sim/rendering/rembrandt/enabled</property>
-        	</condition>
-            <object-name>HUDGlass</object-name>
+        </condition>
+        <object-name>HUDGlass</object-name>
     </effect>
 
     <!-- Shaders -->
