@@ -362,25 +362,13 @@
         <!-- Game Multiplayer -->
         <multiplay>
             <generic>
-                <int n="0" type="int">0</int>
-                <int n="1" type="int">0</int>
-                <int n="2" type="int">0</int>
-                <int n="3" type="int">0</int>
-                <int n="4" type="int">0</int>
-                <int n="5" type="int">0</int>
-                <int n="6" type="int">0</int>
-                <int n="7" type="int">0</int>
-                <int n="8" type="int">0</int>
-                <int n="9" type="int">0</int>
-                <int n="10" type="int">0</int>
-                <int n="11" type="int">0</int>
-                <int n="12" type="int">0</int>
                 <float n="0" alias="/gear/gear[0]/sprayspeed-ms"/>
                 <float n="1" alias="/gear/gear[1]/sprayspeed-ms"/>
                 <float n="2" alias="/gear/gear[2]/sprayspeed-ms"/>
                 <float n="3" alias="/gear/gear[0]/spray-density"/>
                 <float n="4" alias="/gear/gear[1]/spray-density"/>
                 <float n="5" alias="/gear/gear[2]/spray-density"/>
+                <float n="6" alias="/controls/engines/engine/mixture"/> <!-- animates nozzles -->
                 <bool n="0" alias="/controls/eject"/>
             </generic>
         </multiplay>
