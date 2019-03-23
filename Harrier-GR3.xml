@@ -22,7 +22,7 @@ January 25, 2012 -->
 
 <fuselage ax="0.00" ay="0.00" az="0.00"
           bx="-15.57" by="0.00" bz="1.11"
-          width="1.6" taper="0.1" midpoint="0.3"/>
+          width="1.6" taper="0.1" midpoint="0.214"/>
 
 <wing x="-7.32" y="0.46" z="0.93" length="3.71" chord="3.15"
       taper=".294" sweep="28" dihedral="-11" camber="0.05">
