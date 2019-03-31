@@ -1,0 +1,1128 @@
+# Things for auto-hover.
+#
+# We control /controls/engines/engine/throttle to maintain height or
+# ascent/descent rate, /controls/flight/elevator to maintain forward/backwards
+# speed, /controls/flight/aileron to maintain sideways speed, and
+# /controls/flight/rudder to control heading or rotation speed.
+#
+# By default, all quantities are in SI units.
+#
+# Our behaviour is controlled by the following properties:
+#
+#   /controls/auto-hover/y-target:
+#       off - Auto-hover height control off.
+#
+#       current - Maintain fixed altitude (the current altitude at the time that
+#       /controls/auto-hover/y-target was set to 'current').
+#
+#       Otherwise the target ascent rate in fps.
+#
+#   /controls/auto-hover/xz-mode
+#       air speed       - Control horizontal speed relative to air.
+#       ground speed    - Control horizontal speed relative to ground.
+#
+#   /controls/auto-hover/x-target
+#       Target lateral speed (+ve to right) in knots, or 'off'.
+#
+#   /controls/auto-hover/z-target
+#       Target forward speed in knots or 'off'.
+#
+#   /controls/auto-hover/rotation-target
+#       Target rotation speed in degrees per sec, or 'current' to maintain
+#       current heading, or 'off'.
+#
+
+var knots2si = 1852.0/3600;     # Knots to metres/sec.
+var ft2si = 12 * 2.54 / 100;    # Feet to metres
+var lbs2si = 0.45359237;        # Pounds to kilogrammes.
+# Some constants for conversion between imperial/metric.
+
+var gravity = 9.81; # Gravity in m/s/s.
+
+
+var clip_abs = func(x, max) {
+    if (x > max)    return max;
+    if (x < -max)   return -max;
+    return x;
+}
+
+var in_replay = func() {
+    return props.globals.getValue('/sim/replay/replay-state') == 1;
+}
+
+var on_ground = func() {
+    if (0
+            or props.globals.getValue('/gear/gear/wow')
+            or props.globals.getValue('/gear/gear[1]/wow')
+            or props.globals.getValue('/gear/gear[2]/wow')
+            or props.globals.getValue('/gear/gear[3]/wow')
+            ) {
+        return 1;
+    }
+    return 0;
+}
+
+var make_window = func(x, y) {
+    var w = screen.window.new(
+        x,
+        y,
+        1,      # num of lines.
+        9999,   # timeout
+        );
+    w.bg = [0,0,0,.5]; # black alpha .5 background
+    w.fg = [1, 1, 1, 0.5];
+    return w;
+}
+
+var auto_hover_z_window         = make_window( 20, 150);
+var auto_hover_x_window         = make_window( 20, 175);
+var auto_hover_rotation_window  = make_window( 20, 200);
+var auto_rotation_height_window = make_window( 20, 225);
+
+props.globals.setValue('/controls/auto-hover/z-speed-error', 0);
+
+
+# Class for setting a control (e.g. an elevator) whose derivitive (wrt to time)
+# is proportional to third derivitive (wrt time) of a target value (typically a
+# speed).
+#
+# Params:
+#
+#   name
+#       Name to use inside property names.
+#       We read/write various properties, such as:
+#           /controls/auto-hover/<name>-mode
+#           /controls/auto-hover/<name>-airground-mode
+#           /controls/auto-hover/<name>-speed-target
+#           /controls/auto-hover/<name>-speed-target-delta
+#   name_user
+#       Human-friendly name to use in diagnostics.
+#   period
+#       Delay in seconds between updates.
+#   mode_name
+#       Name of property that controls whether we use air speed or ground
+#       speed. Typically modified by the user.
+#   airspeed_get
+#   groundspeed_get
+#       Callables that returns the airspeed/groundspeed that we are trying to
+#       control. This is a callable, rather than a property name, so that we
+#       can be used with things that aren't available directly but must instead
+#       be calculated, e.g. lateral airspeed.
+#   control_name
+#       Name of property that we modify in order to control the speed, e.g. the
+#       elevator property.
+#   speed_target_name
+#       Name of property which is the target value for speed in knots or 'off';
+#       this can be updated by the user.
+#   control_smoothing
+#       Sets the smoothing we apply to <control> to crudely model the delay in
+#       it affecting <speed>.
+#   t_deriv
+#       Time in seconds over which we notionally expect our corrections to take
+#       affect. This determines the size of changes to <control>.
+#   window
+#       We write status messages to this window.
+#
+# E.g. when hovering, forward speed is controlled by pitch. Forwards
+# acceleration is roughly proportional to pitch angle (measured downward), and
+# the derivitive of pitch angle (wrt time) is roughly proportional to elevator
+# value.
+#
+# So if D foo is dfoo/ft:
+#
+#   D speed = pitch
+#   D pitch = elevator - elevator0
+#
+# and:
+#
+#   DD speed = elevator - elevator0
+#
+# We don't know elevator0 (it's the neutral elevator position), so we
+# differentiate again to get something we can implement:
+#
+#   DDD speed = D elevator
+#
+# For each iteration, we calculate the current DDD speed. And we also determine
+# a target DDD speed, based on the target speed or accelaration, and use this
+# to increment/decrement the elevator.
+#
+# There is usually a delay between changing the elevator and seeing the affect
+# on pitch and then on accelaration. We model this by using a slightly smoothed
+# and delayed 'effective elevator', determined by the <control_smoothing>
+# param.
+#
+var auto_hover_speed = {
+    new: func(
+            name,
+            name_user,
+            period,
+            airspeed_get,
+            groundspeed_get,
+            control_name,
+            control_smoothing,
+            t_deriv,
+            window,
+            debug=0,
+            ) {
+        var m = { parents:[auto_hover_speed]};
+        
+        m.name = name;
+        m.name_user = name_user;
+        m.period = period;
+        m.airspeed_get = airspeed_get;
+        m.groundspeed_get = groundspeed_get;
+        m.control_name = control_name;
+        m.control_smoothing = control_smoothing;
+        m.t_deriv = t_deriv;
+        m.window = window;
+        m.debug = debug;
+        
+        m.speed_prev = 0;
+        m.accel_target = 0;
+        m.accel_prev = 0;
+        me.on_ground = on_ground();
+        
+        m.mode_prev = 'off';
+        props.globals.setValue(sprintf('/controls/auto-hover/%s-mode', m.name), m.mode_prev);
+        props.globals.setValue(sprintf('/controls/auto-hover/%s-airground-mode', m.name), 'ground');
+        props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target', m.name), '');
+        props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target-delta', m.name), '');
+        
+        m.control = 0;
+        m.control_smoothed = 0;
+        
+        # Schedule the first call to m.do().
+        settimer( func { m.do()}, 0);
+        
+        return m;
+    },
+        
+    do: func() {
+        var mode = props.globals.getValue(sprintf('/controls/auto-hover/%s-mode', me.name));
+        
+        if (mode == 'off' or mode == 'ground speed pid' or in_replay()) {
+            # We are disabled.
+            if (me.mode_prev != mode) {
+                me.mode_prev = mode;
+                me.window.write('');
+                props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target', me.name), '');
+            }
+            # Don't be called too frequently if we are disabled.
+            settimer( func { me.do()}, 0.5);
+            return;
+        }
+        
+        # We are active.
+        if (me.debug)   printf("me=%s mode=%s me.mode_prev=%s", me, mode, me.mode_prev);
+
+        if (mode != me.mode_prev) {
+            me.mode_prev = mode;
+            me.speed_prev = nil;
+            me.accel_prev = nil;
+            me.control_smoothed = nil;
+            if (on_ground()) {
+                me.control_smoothed = 0;
+            }
+        }
+        
+        og = on_ground();
+        if (!og and me.on_ground) {
+            # Reset control if we've just left the ground.
+            me.control_smoothed = 0;
+        }
+        me.on_ground = og;
+
+        var airground_mode = props.globals.getValue(sprintf('/controls/auto-hover/%s-airground-mode', me.name), 0);
+        if (airground_mode == 'air')            speed = me.airspeed_get();
+        else if (airground_mode == 'ground')    speed = me.groundspeed_get();
+        else {
+            printf('unrecognised airground_mode: %s', airground_mode);
+            return;
+        }
+
+        var speed_target = props.globals.getValue(sprintf('/controls/auto-hover/%s-speed-target', me.name), 0);
+        if (speed_target == nil or speed_target == '') {
+            speed_target = speed;
+            props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target', me.name), speed_target / knots2si);
+        }
+
+        if (mode == 'speed' or mode == 'speed' or mode == 'distance') {
+
+            if (me.speed_prev == nil) {
+                me.speed_prev = speed;
+            }
+            var accel = (speed - me.speed_prev) / me.period;
+
+            if (me.accel_prev == nil)   me.accel_prev = accel;
+
+            var daccel = (accel - me.accel_prev) / me.period;
+
+            me.speed_prev = speed;
+            me.accel_prev = accel;
+
+            if (mode == 'distance') {
+                # This doesn't work yet.
+                var distance = props.globals.getValue(me.speed_target_name);
+                var distance -= speed * me.period;
+                props.globals.setValue(me.speed_target_name, distance);
+
+                if (0) {
+                    var speed_target = distance / me.t_deriv / 4;
+                }
+                if (0) {
+                    var d2 = distance - speed * me.t_deriv;
+                    var s2 = d2 / me.t_deriv;
+                    var accel_target = (s2 - speed) / me.t_deriv;
+                }
+
+                var accel = 2;
+                var speed_max = accel * me.t_deriv;
+                if (distance < 0)   accel = -accel;
+                t = math.sqrt(2*distance/accel);
+                var tmax = me.t_deriv;
+                if (t > tmax) {
+                    var speed_target = speed_max;
+                    var accel_target = (speed_target - speed) / me.t_deriv;
+                }
+                else {
+                    var accel_target = -speed*speed / (2*distance);
+                    var speed_target = speed + accel_target * me.t_deriv;
+                }
+
+                if (distance < 0) {
+                    accel_target = -accel_target;
+                    speed_target = -speed_target;
+                }
+
+                printf('distance=%.2f speed_max=%.2f t=%.2s speed=%.2f speed_target=%.2f accel=%.2f accel_target=%.2f',
+                        distance,
+                        speed_max,
+                        t,
+                        speed,
+                        speed_target,
+                        accel,
+                        accel_target,
+                        );
+
+                speed_target_kts = speed_target / knots2si;
+            }
+            else {
+
+                var speed_target_kts = props.globals.getValue(sprintf('/controls/auto-hover/%s-speed-target', me.name), 0);
+                if (speed_target_kts == '') {
+                    # No target speed set, so use current speed.
+                    speed_target_kts = speed / knots2si;
+                }
+
+                var speed_target_delta = props.globals.getValue(sprintf('/controls/auto-hover/%s-speed-target-delta', me.name), 0);
+                if (speed_target_delta != '') {
+                    # Alter target speed.
+                    #
+                    # We round to multiple of 0.5 for convenience.
+                    speed_target_kts += speed_target_delta;
+                    speed_target_kts = math.round(speed_target_kts, 0.5);
+                    props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target-delta', me.name), '');
+                    props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target', me.name), speed_target_kts);
+                }
+
+                var speed_target = speed_target_kts * knots2si;
+                var accel_target = (speed_target - speed) / me.t_deriv;
+            }
+
+            if (1) {
+
+                # Don't try to accelarate too much - can end up over-pitching.
+                var accel_target_max = 0.5 + 0.1 * math.sqrt(abs(speed));
+                accel_target = clip_abs(accel_target, accel_target_max);
+                var text = sprintf('auto-hover: %s %s:', me.name_user, mode);
+                if (mode == 'distance') {
+                    text = sprintf('%s distance=%.2f.', text, distance);
+                }
+                text = sprintf(
+                        '%s target=% .2f kts actual=% .2f kts (%+.2f kts)',
+                        text,
+                        speed_target_kts,
+                        speed / knots2si,
+                        (speed - speed_target) / knots2si,
+                        );
+
+                me.window.write(text);
+            }
+
+            # Set daccel_target by looking at accel target vs actual, using
+            # me.t_deriv to scale.
+            var daccel_target = (accel_target - accel) / me.t_deriv;
+
+            var daccel_max = 0.2*10;
+            daccel_target= clip_abs(daccel_target, daccel_max);
+            var e = me.control_smoothing;
+            if (me.control_smoothed == nil) {
+                me.control = props.globals.getValue(me.control_name, 0);
+                me.control_smoothed = me.control;
+            }
+            
+            var control_actual = props.globals.getValue(me.control_name);
+            me.control_smoothed = (1-e) * me.control_smoothed + 0 * e * me.control + e * control_actual;
+
+            # Derivitive of <control> is proportional to <daccel_target>. We
+            # assume that <me.t_deriv> has scaled things; though might be
+            # better to use daccel_target * me.period here?
+            var control_new = me.control_smoothed + daccel_target;
+
+            if (me.debug) {
+                printf(
+                        'speed: %+.5f target=%+.5f. accel: %+.5f target=%+.5f. daccel: %+.5f target=%+.5f. control: raw=%+.5f smoothed=%+.5f => new=%+.5f',
+                        speed,
+                        speed_target,
+                        accel,
+                        accel_target,
+                        daccel,
+                        daccel_target,
+                        me.control,
+                        me.control_smoothed,
+                        control_new,
+                        );
+            }
+
+            if (!on_ground()) {
+                me.control = control_new;
+                props.globals.setValue(me.control_name, me.control);
+            }
+            # We store the control setting in our state so that we overwrite
+            # any changes by the user.
+        }
+        
+        settimer( func { me.do()}, me.period);
+    },
+};
+
+
+var z_speed = nil;
+if (z_speed == nil) {
+z_speed = auto_hover_speed.new(
+        name: 'z',
+        name_user: 'forwards',
+        period: 0.1,
+        airspeed_get: func () {
+            # Forwards air-speed.
+            return props.globals.getValue('/velocities/equivalent-kt') * knots2si;
+        },
+        groundspeed_get: func () {
+            # Forwards ground-speed.
+            return props.globals.getValue('/velocities/uBody-fps') * ft2si;
+        },
+        control_name: '/controls/flight/elevator',
+        control_smoothing: 0.015,
+        t_deriv: 3.5,
+        window: auto_hover_z_window,
+        debug: 0,
+        );
+}
+# There are a few properties that look like they give us
+# the airspeed, but they don't all behave as we want.
+# /instrumentation/airspeed-indicator/indicated-speed-kt seems to jump
+# every few seconds. /velocities/airspeed-kt doesn't go negative when we go
+# backwards.
+#
+# /velocities/equivalent-kt seems to behave ok
+
+var x_speed = auto_hover_speed.new(
+        name: 'x',
+        name_user: 'sideways',
+        period: 0.1,
+        airspeed_get: func () {
+            # Lateral (+ve to right) air-speed.
+            var z_speed_kt = props.globals.getValue('/velocities/equivalent-kt', 0);
+            var z_speed = z_speed_kt * knots2si;
+            var angle = props.globals.getValue('/orientation/side-slip-rad');
+            var x_speed = z_speed * math.tan(angle);
+            if (0) printf('z_speed=%.1f kt; angle=%.1f deg; returning x_speed=%.1f',
+                    z_speed,
+                    angle * 180 / math.pi,
+                    x_speed,
+                    );
+            return x_speed;
+        },
+        groundspeed_get: func () {
+            # Lateral (+ve to right) ground-speed.
+            #return vbody_smooth();
+            return props.globals.getValue('/velocities/vBody-fps') * ft2si;
+        },
+        control_name: '/controls/flight/aileron',
+        speed_target_name: '/controls/auto-hover/x-target',
+        control_smoothing: 0.015,
+        t_deriv: 3.5,
+        window: auto_hover_x_window,
+        );
+# There doesn't appear to be a property for lateral airspeed, so we calculate
+# it from forward airspeed and side-slip angle.
+
+
+
+
+# Class for handling rudder when hovering.
+#
+# As of 2019-01-09 this is unused - we have an implementation that uses fg's
+# autopilot support.
+#
+# Params:
+#   name
+#       Name to use on screen.
+#   period
+#       Delay in seconds between updates.
+#   speed_get
+#       Function which returns rotation speed in degrees per second.
+#   heading_get
+#       Function which returns current heading in degrees.
+#   control_name
+#       Name of property that we modify in order to control rotation/heading,
+#       e.g. the rudder property.
+#   target_name
+#       Name of property whose value is the target value for rotation speed in
+#       degrees per second, or 'off' if we are to do nothing, or 'current' if
+#       we should target the current heading.
+#   control_smoothing
+#       Sets the smoothing we apply to <control> to crudely model the delay in
+#       it affecting <speed>.
+#   t_deriv
+#       Time in seconds over which we notionally expect our corrections to take
+#       affect. This determines the size of changes to <control>.
+#   window
+#       We write status messages to this window.
+#   debug
+#       If true, we output extra diagnostics.
+#
+var auto_hover_rotation = {
+    new: func(
+            name,
+            period,
+            mode_name,
+            speed_get,
+            heading_get,
+            control_name,
+            target_name,
+            control_smoothing,
+            t_deriv,
+            window,
+            debug=0,
+            ) {
+        var m = { parents:[auto_hover_rotation]};
+        
+        m.name = name;
+        m.period = period;
+        m.mode_name = mode_name;
+        m.speed_get = speed_get;
+        m.heading_get = heading_get;
+        m.control_name = control_name;
+        m.target_name = target_name;
+        m.control_smoothing = control_smoothing;
+        m.t_deriv = t_deriv;
+        m.window = window;
+        m.debug = debug;
+        
+        m.mode_prev = '';
+        m.speed_prev = 0;
+        m.accel_target = 0;
+        m.accel_prev = 0;
+        
+        m.target_prev = 'off';
+        props.globals.setValue(m.target_name, m.target_prev);
+        
+        m.control = 0;
+        m.control_smoothed = 0;
+        
+        # Schedule the first call to m.do().
+        settimer( func { m.do()}, 0);
+        
+        return m;
+    },
+        
+    do: func() {
+        var active = 1;
+        var mode = props.globals.getValue(me.mode_name, 0);
+        
+        if ( in_replay()) {
+            active = 0;
+        }
+        else if (mode == 'speed pid' or mode == 'heading pid') {
+        }
+        else if (mode == nil or mode == '') {
+            active = 0;
+            if (me.mode_prev != mode) {
+                me.window.write('');
+            }
+        }
+        else {
+            if (mode == 'speed') {
+                var speed_target = props.globals.getValue('/controls/auto-hover/rotation-speed-target', 0);
+                if (me.mode_prev != mode) {
+                    # Starting from scratch; preset some state appropriately.
+                    me.control = props.globals.getValue(me.control_name, 0);
+                    me.control_smoothed = me.control;
+                }
+            }
+            else if (mode == 'heading') {
+                #if (me.mode_prev != mode) {
+                #    # Target the current heading.
+                #    me.heading_target = me.heading_get();
+                #}
+                var heading_target = props.globals.getValue('/controls/auto-hover/rotation-heading-target', 0);
+                var heading = me.heading_get();
+                var speed_target = (heading_target - heading) / me.t_deriv;
+            }
+            else {
+                printf('unrecognised mode: %s', mode);
+                return;
+            }
+
+            # Figure out how to get to speed_target.
+            var speed = me.speed_get();
+            var accel = (speed - me.speed_prev) / me.period;
+            #var daccel = (accel - me.accel_prev) / me.period;
+
+            me.speed_prev = speed;
+            me.accel_prev = accel;
+
+            var accel_target = (speed_target - speed) / me.t_deriv;
+
+            # Don't try to accelarate too much - can end up unstable.
+            var accel_target_max = 0.2;
+            accel_target = clip_abs(accel_target, accel_target_max);
+            var text = sprintf('auto-hover: %s:', me.name);
+            if (mode == 'heading') {
+                text = sprintf(
+                        '%s target heading=% .1f deg, actual=% .1f deg (%+.1f deg)',
+                        text,
+                        heading_target,
+                        heading,
+                        heading - heading_target,
+                        );
+            }
+            else {
+                text = sprintf(
+                        '%s rotation speed=% .1f deg/s, actual=% .1f deg/s (%+.1f deg/s)',
+                        text,
+                        speed_target,
+                        speed,
+                        speed - speed_target,
+                        );
+            }
+            me.window.write(text);
+
+            var e = me.control_smoothing;
+            var control_actual = props.globals.getValue(me.control_name);
+            me.control_smoothed = (1-e) * me.control_smoothed + 0 * e * me.control + e * control_actual;
+
+            var control_new = me.control_smoothed + accel_target;
+
+            if (me.debug) {
+                printf(
+                        'speed: %+.5f target=%+.5f. accel: %+.5f target=%+.5f. control: raw=%+.5f smoothed=%+.5f => new=%+.5f',
+                        speed,
+                        speed_target,
+                        accel,
+                        accel_target,
+                        me.control,
+                        me.control_smoothed,
+                        control_new,
+                        );
+            }
+
+            if (!on_ground()) {
+                me.control = control_new;
+                props.globals.setValue(me.control_name, me.control);
+                # We store the control setting here so that we can overwrite any
+                # changes by the user.
+            }
+        }
+        
+        me.mode_prev = mode;
+        
+        if (active) settimer( func { me.do()}, me.period);
+        else {
+            settimer( func { me.do()}, 0.5);
+            #printf('inactive: rotation');
+        }
+    },
+};
+
+
+var auto_hover_rotation = auto_hover_rotation.new(
+        name: 'heading',
+        period: 0.1,
+        mode_name: '/controls/auto-hover/rotation-mode',
+        speed_get: func () {
+            return props.globals.getValue('orientation/yaw-rate-degps', 0);
+        },
+        heading_get: func() {
+            return props.globals.getValue('orientation/heading-deg', 0);
+        },
+        control_name: '/controls/flight/rudder',
+        target_name: '/controls/auto-hover/rotation-speed-target',
+        control_smoothing: 0.015,
+        t_deriv: 3.5,
+        window: auto_hover_rotation_window,
+        debug: 0,
+        );
+
+var auto_hover_rotation_current_heading = func() {
+    props.globals.setValue(
+            '/controls/auto-hover/rotation-heading-target',
+            props.globals.getValue('orientation/heading-deg', 0),
+            );
+    props.globals.setValue('/controls/auto-hover/rotation-mode', 'heading');
+}
+var auto_hover_rotation_current_heading_pid = func() {
+    props.globals.setValue(
+            '/controls/auto-hover/rotation-heading-target',
+            props.globals.getValue('orientation/heading-deg', 0),
+            );
+    props.globals.setValue('/controls/auto-hover/rotation-mode', 'heading pid');
+}
+var auto_hover_rotation_change = func(delta) {
+    var mode = props.globals.getValue('/controls/auto-hover/rotation-mode', 0);
+    var speed_target = 0;
+    if (mode == 'speed' or mode == 'speed pid') {
+        speed_target = props.globals.getValue('/controls/auto-hover/rotation-speed-target', 0);
+        if (speed_target == nil)    speed_target = 0;
+    }
+    else {
+        if (mode == 'heading pid')  mode = 'speed pid';
+        else    mode = 'speed';
+        props.globals.setValue('/controls/auto-hover/rotation-mode', mode);
+        props.globals.setValue('/controls/auto-hover/rotation-heading-target', '');
+    }
+    speed_target += delta;
+    props.globals.setValue('/controls/auto-hover/rotation-speed-target', speed_target);
+}
+
+var auto_hover_rotation_off = func() {
+    props.globals.setValue('/controls/auto-hover/rotation-mode', '');
+    props.globals.setValue('/controls/flight/rudder', 0);
+}
+
+# Class for controlling height when hovering.
+#
+# Params:
+#
+#   period:
+#       Delay in seconds between updates.
+#   mode_name
+#       Name of property that controls operation. This property's value is
+#       typically modified by user keypresses.
+#
+#       Values:
+#           off     - We do nothing.
+#           current - Maintain current height.
+#           Otherwise target ascent rate in feet per second.
+#   window
+#       We write status messages to this window.
+#
+var auto_hover_height = {
+    new: func(
+            period,
+            mode_name,
+            window,
+            ) {
+        var m = { parents:[auto_hover_height]};
+        m.it = 0;
+        m.critical_active = 0;
+        m.period = period;
+        m.mode_name = mode_name;
+        m.window = window;
+        
+        m.mode_prev = 'off';
+        props.globals.setValue(m.mode_name, m.mode_prev);
+        
+        # Schedule the first call to m.do().
+        settimer( func { m.do()}, 0);
+        
+        return m;
+    },
+    
+    do: func () {
+    
+        var mode = props.globals.getValue(me.mode_name);
+        
+        if (mode == 'off' or in_replay()) {
+            if (me.mode_prev != mode)   me.window.write('');
+            settimer( func { me.do()}, 0.5);
+            return;
+        }
+        
+        else {
+        
+            me.it += 1;
+
+            var accel_fpss = -1 * props.globals.getValue('/accelerations/ned/down-accel-fps_sec');
+            var accel = accel_fpss * ft2si;
+
+            var speed_fps = props.globals.getValue('/velocities/vertical-speed-fps');
+            var speed = speed_fps * ft2si;
+            # Current vertical speed in m/s.
+
+            var height_ft = props.globals.getValue('/position/altitude-ft');
+            var height = height_ft * ft2si;
+            # Current height in metres.
+
+            var thrust_lb = props.globals.getValue('/engines/engine/thrust-lbs', 0);
+            var thrust = thrust_lb * lbs2si * gravity;
+            # Current engine thrust in Newtons. We assume this is pointed directly
+            # downwards, but actually it's probably ok if this isn't the case -
+            # we'll scale things automatically when we modify the throttle.
+
+            var throttle = props.globals.getValue('/controls/engines/engine/throttle');
+
+            if (mode != me.mode_prev)
+            {
+                # We have changed to a new hover-mode.
+                if (mode == 'current') {
+                    me.height_target = height;
+                    # Use current height as target.
+                    #window.write(sprintf('auto-hover: target height: %.1f ft', height_ft));
+                }
+                else {
+                    #window.write(sprintf('auto-hover: target vertical speed: %.1f fps', auto_hover));
+                }
+            }
+
+            if (me.mode_prev == 'off') {
+                # Starting auto-hover. Need to initialise smoothed variables to
+                # current values:
+                me.throttle_smoothed = throttle;
+                me.accel_max_smoothed = nil;
+            }
+
+            # Find target vertical speed:
+            #
+            if (mode == 'current') {
+
+                # Calculate desired vertical speed by comparing target height and
+                # current height.
+
+                var t = 3;
+                # This is vaguely a time in seconds over which we will try to reach
+                # target height.
+
+                speed_target = (me.height_target - height) / t;
+                # Our target vertical speed. Approaches zero as we reach target
+                # height.
+
+                # Restrict vertical speed to avoid problems if we are a long way
+                # from the target height.
+                var speed_max_fps = 200;
+                var speed_max = speed_max_fps * ft2si;
+                if (speed_target > speed_max)   speed_target = speed_max;
+                if (speed_target < -speed_max)  speed_target = -speed_max;
+
+                me.window.write(
+                        sprintf(
+                                'auto-hover: height: target=%.2f ft actual=%.2f ft (%+.2f ft)',
+                                me.height_target / ft2si,
+                                height_ft,
+                                height_ft - me.height_target / ft2si,
+                                )
+                        );
+            }
+            else
+            {
+                # Use target vertical speed directly.
+                speed_target = mode * ft2si;
+                if (0) me.window.write(
+                        sprintf(
+                                'auto-hover: vertical speed: target=%.2f fps actual=%.2f fps (%+.2f fps)',
+                                mode,
+                                speed_fps,
+                                speed_fps - mode,
+                                )
+                        );
+            }
+
+            # Decide on a target vertical acceleration to get us to the target
+            # vertical speed.
+            #
+            # We know current acceleration and current thrust, and we know how
+            # these are related (thrust - mass*g = mass*accel), and we assume
+            # that thrust is proportional to throttle, so this will allow us to
+            # adjust the throttle in an appropriate way.
+
+            var t = 8;
+            # This is vaguely a time in seconds over which we will try to reach
+            # the target speed.
+
+            var accel_target = (speed_target - speed) / t;
+
+            var throttle_smoothed_e = 0.4;
+            me.throttle_smoothed = me.throttle_smoothed * (1-throttle_smoothed_e) + throttle * throttle_smoothed_e;
+            #
+            # We use a smoothed throttle value to crudely model the engine's slow
+            # response to throttle changes.
+            #
+            # Would be nice to do this more accurately - e.g. maybe we could
+            # model the engine by tracking the throttle over time, and
+            # calculate the effective average thrust over the period of time
+            # that the current vertical acceleration was measured.
+
+            var override_text_1 = '';
+            var height_above_ground = props.globals.getValue('/position/gear-agl-m');
+            
+            if (speed >= -7*ft2si and speed_target > -6*ft2si) {
+                #printf( 'doing nothing because speed=%.2f fps', speed/ft2si);
+            }
+            else if (speed < 0 and throttle >= 0.1 and accel != -gravity and height_above_ground > 0) {
+            
+                # See whether we need to override accel_target to avoid
+                # crashing into ground.
+                #
+                # We don't bother to try to correct for vertical air
+                # resistence, though this means we may slightly overderestimate
+                # the maximum deaccelaration we can achieve.
+                
+                
+                # Look at height a couple of seconds from now, to crudely
+                # correct for engine response time.
+                var height_above_ground2 = height_above_ground + speed * 2;
+                if (height_above_ground2 < 0)   height_above_ground2 = 1;
+
+                var speed_slow = -2 * ft2si;
+                
+                var speed2 = speed;
+                var speed3 = speed + 3 * accel;
+                if (speed3 < speed2)    speed2 = speed3;
+
+                accel_critical = (speed2*speed2 - speed_slow*speed_slow) / 2 / height_above_ground2;
+                # This is the constant accelaration that would give a
+                # smooth landing, given our current height and vertical
+                # speed.
+
+                var thrust_max = thrust * 1.0 / me.throttle_smoothed;
+                # Thrust seems to be exactly proportional to throttle.
+                
+                var air_resistance = 82 * -speed;
+                # Not sure this is significant.
+
+                var mass = (thrust + air_resistance) / (gravity + accel);
+                accel_max = thrust_max / mass - gravity;
+                # This is the maximum vertical acceleration that we can achieve.
+                #
+                # Unfortunately this isn't an accurate or stable measure. Maybe
+                # we need to take vertical air resistance into account?
+
+                # Our calculation for accel_max is noisy, so we smooth it
+                # here. In theory it should be stable, changing only as fuel
+                # load decreases and/or engine power is affected by altitude.
+                var accel_max_smoothed_e = 0.1;
+                if (me.accel_max_smoothed == nil) {
+                    me.accel_max_smoothed = accel_max;
+                }
+                else {
+                    me.accel_max_smoothed = me.accel_max_smoothed * (1-accel_max_smoothed_e)
+                            + accel_max*accel_max_smoothed_e;
+                }
+                
+                var safety_hack = 0.5;
+                var agl_hack = 50*ft2si;
+
+                var speed_critical = speed_target;
+                if (me.accel_max_smoothed > 0) {
+                    speed_critical = -math.sqrt( 2 * me.accel_max_smoothed*safety_hack * height_above_ground);
+                }
+                # speed_critical is speed we would be doing at this altitude in
+                # perfect fast descent.
+
+                var override = 0;
+                if (accel_critical > me.accel_max_smoothed * safety_hack) {
+                    #printf('accel_critical > me.accel_max_smoothed * safety_hack');
+                    override = 1;
+                    me.critical_active = me.it;
+                }
+                else if (speed2 < speed_critical*0.75) {
+                    #printf('speed2 < speed_critical*0.75');
+                    override = 1;
+                    me.critical_active = me.it;
+                }
+                else if (speed2 < speed_critical*0.5 and height_above_ground/ft2si < 100) {
+                    #printf('speed2 < speed_critical*0.5 and height_above_ground/ft2si < 100');
+                    override = 1;
+                    me.critical_active = me.it;
+                }
+                else if (height_above_ground < agl_hack and speed_target < 2*speed_slow) {
+                    #printf('height_above_ground < agl_hack and speed_target < 2*speed_slow');
+                    override = 1;
+                    me.critical_active = me.it;
+                }
+                else if (me.critical_active and me.it < me.critical_active + 5/me.period) {
+                    #printf('continuity');
+                    override = 1;
+                }
+                else {
+                    me.critical_active = 0;
+                }
+
+                if (override) {
+                    # We need to override accel_target, because vertical
+                    # acceleration required is near the maximum we can do.
+                    accel_target = accel_critical;
+
+                    # Increment accel_target a little if it's a lot bigger
+                    # than the existing accel, to crudely compensate for
+                    # the delay in large changes to throttle.
+                    if (accel_target > accel) {
+                        accel_target = accel_target + 2 * (accel_target - accel);
+                    }
+
+                    override_text_1 = ' * override *';
+
+                    if (height_above_ground < agl_hack and speed2 >= speed_slow*2) {
+                        # Switch mode to maintain current height when we are
+                        # slow and near ground.
+                        #
+                        # [Trying to land causes problems - we tend to bounce
+                        # and get unstable (unless we kill the engine, but not
+                        # sure we should automate that).
+                        #
+                        props.globals.setValue(me.mode_name, 'current');
+                        override_text_1 = ' #';
+                    }
+                }
+
+                if (0) {
+                    # Detailed diagnostics about override.
+                    #
+                    var override_text_2 = sprintf(
+                            '%s override it=%s agl=%.1f ft speed=[%.1f fps 2=%.1f fps critical=%.1f fps] fps throttle=[%.2f smoothed=%.2f] thrust=[%.1f max=%.1f] air_resistance=%.1f mass=%.1f kg accel=[%.2f fps/s critical=%.2f fps/s max=%.2f fps/s target=%.2f fps/s]',
+                            override_text_1,
+                            me.it,
+                            height_above_ground / ft2si,
+                            speed / ft2si,
+                            speed2 / ft2si,
+                            speed_critical / ft2si,
+                            throttle,
+                            me.throttle_smoothed,
+                            thrust,
+                            thrust_max,
+                            air_resistance,
+                            mass,
+                            accel / ft2si,
+                            accel_critical / ft2si,
+                            me.accel_max_smoothed / ft2si,
+                            accel_target / ft2si,
+                            );
+                    printf( "%s", override_text_2);
+                }
+            }
+            
+            var thrust_target = thrust * (accel_target + gravity) / (accel + gravity);
+            
+            var throttle_target = 0;
+            if (me.throttle_smoothed == 0 and thrust_target > thrust) {
+                # This is a hack to ensure we can increase thrust if it is
+                # currently zero.
+                throttle_target = thrust_target / thrust * 0.1;
+            }
+            else {
+                throttle_target = thrust_target / thrust * me.throttle_smoothed;
+            }
+            
+            # Limit throttle to range 0..1.
+            if (throttle_target < 0)    throttle_target = 0;
+            if (throttle_target > 1)    throttle_target = 1;
+
+            if (0) {
+                # Detailed diagnostics.
+                height_target = -1;
+                printf('auto-hover height mode=%.1f: height=[%.1f (%.1fft) target=%.1fm (%.1fft)] vel=[%.2f target=%.2f] accel=[%.2f target=%.2f] throttle=[%.2f smoothed=%.2f] thrust=[%.1f target=%.1f] throttle=[%.1f target=%.1f]',
+                        mode,
+                        height,
+                        height / ft2si,
+                        height_target,
+                        height_target / ft2si,
+                        speed,
+                        speed_target,
+                        accel,
+                        accel_target,
+                        throttle,
+                        me.throttle_smoothed,
+                        thrust,
+                        thrust_target,
+                        100*throttle,
+                        100*throttle_target,
+                        );
+            }
+
+            if (0) {
+                # Brief diagnostics.
+                if (auto_hover == 0) {
+                    printf('auto-hover: height: target=%.1f ft, actual=%.1f ft. vertical speed=%.2f fps.',
+                            me.height_target / ft2si,
+                            height / ft2si,
+                            speed / ft2si,
+                            );
+                }
+                else {
+                    printf('auto-hover: vertical speed: target=%.2f fps actual=%.2f fps.',
+                            speed_target / ft2si,
+                            speed / ft2si,
+                            );
+                }
+            }
+
+            # Update throttle:
+            
+            if ( !on_ground()) {
+                props.globals.setValue('/controls/engines/engine/throttle', throttle_target);
+            }
+            
+            if (mode != 'current') {
+                if (override_text_1 != '') {
+                    override_text_1 = sprintf('%s throttle=%.2f speed_critical=%.1f fps',
+                            override_text_1,
+                            throttle_target,
+                            speed_critical / ft2si,
+                            );
+                }
+                me.window.write(
+                        sprintf(
+                                'auto-hover: vertical speed: target=% .2f fps actual=% .2f fps (%+.2f fps)%s',
+                                mode,
+                                speed_fps,
+                                speed_fps - mode,
+                                override_text_1,
+                                )
+                        );
+            }
+
+        }
+
+        me.mode_prev = mode;
+        
+        settimer( func { me.do()}, me.period);
+    },
+};
+
+var height = auto_hover_height.new(
+        period: 0.25,
+        mode_name: '/controls/auto-hover/y-target',
+        window: auto_rotation_height_window,
+        );
+
+
+
+var auto_hover_aoa_nozzles_window = make_window( 20, 250);
+
+var auto_hover_aoa_nozzles_change = func(delta) {
+    target = props.globals.getValue('/controls/auto-hover/aoa-nozzles-target');
+    if (target == nil or target == '') {
+        target = props.globals.getValue('/orientation/alpha-deg');
+        target = math.round(target, 0.5);
+    }
+    target = target + delta;
+    props.globals.setValue('/controls/auto-hover/aoa-nozzles-target', target);
+    text = sprintf('auto-hover aoa nozzles: target=%.1f', target);
+    auto_hover_aoa_nozzles_window.write(text);
+}
+
+var auto_hover_aoa_nozzles_off = func() {
+    props.globals.setValue('/controls/auto-hover/aoa-nozzles-target', '');
+    auto_hover_aoa_nozzles_window.write('');
+}

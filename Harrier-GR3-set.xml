@@ -2,6 +2,10 @@
 
 <PropertyList>
 
+    <input>
+        <keyboard include="Harrier-GR3-keyboard.xml"/>
+    </input>
+    
     <sim>
 
         <!-- Info -->
@@ -25,7 +29,7 @@
             <tag>single-engine</tag>
         </tags>
         <author>Petar Jedvaj, Andy Ross, Gary Brown, StuartC, Raptor, Brendan Black, Julian Smith, Ludovic Brenta</author>
-        <aircraft-version>3.0.2</aircraft-version>
+        <aircraft-version>3.1</aircraft-version>
         <status>beta</status>
         <rating>
             <FDM type="int">4</FDM>
@@ -232,46 +236,110 @@
                 <desc>Flares</desc>
             </key>
             
+            
             <key>
-                <name>Alt-1</name>
-                <desc>Auto-hover descent rate 4 fps</desc>
+                <name>Alt-Page up</name>
+                <desc>Auto-hover vertical: increment target vertical speed</desc>
             </key>
             <key>
-                <name>Alt-2</name>
-                <desc>Auto-hover descent rate 3 fps</desc>
-            </key>
-            <key>
-                <name>Alt-3</name>
-                <desc>Auto-hover descent rate 2 fps</desc>
-            </key>
-            <key>
-                <name>Alt-4</name>
-                <desc>Auto-hover descent rate 1 fps</desc>
-            </key>
-            <key>
-                <name>Alt-5</name>
-                <desc>Auto-hover maintain current altitude</desc>
-            </key>
-            <key>
-                <name>Alt-6</name>
-                <desc>Auto-hover ascent rate 1 fps</desc>
-            </key>
-            <key>
-                <name>Alt-7</name>
-                <desc>Auto-hover ascent rate 2 fps</desc>
-            </key>
-            <key>
-                <name>Alt-8</name>
-                <desc>Auto-hover ascent rate 3 fps</desc>
-            </key>
-            <key>
-                <name>Alt-9</name>
-                <desc>Auto-hover ascent rate 4 fps</desc>
+                <name>Alt-Page down</name>
+                <desc>Auto-hover vertical: decrement target vertical speed</desc>
             </key>
             <key>
                 <name>Alt-0</name>
-                <desc>Auto-hover off</desc>
+                <desc>Auto-hover vertical: set target vertical speed to zero</desc>
             </key>
+            <key>
+                <name>Alt--</name>
+                <desc>Auto-hover vertical: maintain current height</desc>
+            </key>
+            <key>
+                <name>Alt-v</name>
+                <desc>Auto-hover vertical: off</desc>
+            </key>
+            
+            <key>
+                <name>Alt-.</name>
+                <desc>Auto-hover horizontal: Set target forwards/sideways speeds to zero</desc>
+            </key>
+            <key>
+                <name>Alt-up</name>
+                <desc>Auto-hover horizontal: Increment target forwards speed</desc>
+            </key>
+            <key>
+                <name>Alt-down</name>
+                <desc>Auto-hover horizontal: Decrement target forwards speed</desc>
+            </key>
+            <key>
+                <name>Alt-right</name>
+                <desc>Auto-hover horizontal: Increment target rightwards speed</desc>
+            </key>
+            <key>
+                <name>Alt-left</name>
+                <desc>Auto-hover horizontal: Decrement target rightwards speed</desc>
+            </key>
+            <key>
+                <name>Alt-a</name>
+                <desc>Auto-hover horizontal: control air speed</desc>
+            </key>
+            <key>
+                <name>Alt-g</name>
+                <desc>Auto-hover horizontal: control ground speed (default)</desc>
+            </key>
+            <key>
+                <name>Alt-h</name>
+                <desc>Auto-hover horizontal: off</desc>
+            </key>
+            
+            <key>
+                <name>Alt-4</name>
+                <desc>Auto-hover rotation: increment target rotation speed to left</desc>
+            </key>
+            <key>
+                <name>Alt-5</name>
+                <desc>Auto-hover rotation: set target heading to current heading</desc>
+            </key>
+            <key>
+                <name>Alt-6</name>
+                <desc>Auto-hover rotation: increment target rotation speed to right</desc>
+            </key>
+            <key>
+                <name>Alt-r</name>
+                <desc>Auto-hover rotation: off</desc>
+            </key>
+            
+            <key>
+                <name>Alt-Insert</name>
+                <desc>Auto-hover aoa nozzles: decrement target angle of attack</desc>
+            </key>
+            <key>
+                <name>Delete</name>
+                <desc>Auto-hover aoa nozzles: increment target angle of attack</desc>
+            </key>
+            <key>
+                <name>Alt-o</name>
+                <desc>Auto-hover aoa nozzles: off</desc>
+            </key>
+
+            <text>
+=== Auto-hover vertical ===
+Uses throttle to control vertical height/speed.
+
+Automatically overides to avoid crash into ground.
+
+=== Auto-hover horizontal ===
+Uses pitch and roll to control forwards/sideways speed.
+
+=== Auto-hover rotation ===
+Uses rudder to control rotation speed or heading.
+
+=== Auto-hover AoA nozzles ===
+
+Uses nozzels to control angle-of-attack; useful if there is not enough thrust
+to hover - suitable target AoA results in as slow an approach speed as
+possible.
+            </text>
+            
 
         </help>
 
@@ -394,223 +462,6 @@
     </consumables>
 
 
-
-    <!-- Keyboard Shortcuts -->
-    <input>
-        <keyboard>
-
-            <key n="99">
-                <name>c</name>
-                <desc>Toggle Canopy</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>Canopy.canopy_switch(2)</script>
-                </binding>
-            </key>
-
-            <key n="100">
-                <name>d</name>
-                <desc>Fire rockets</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>guns.fire_Rocket()</script>
-                </binding>
-                <mod-up>
-                    <binding>
-                        <command>nasal</command>
-                        <script>guns.stop_Rocket()</script>
-                    </binding>
-                </mod-up>
-            </key>
-
-            <key n="101">
-                <name>e</name>
-                <desc>Eject</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>Eject.eject();</script>
-                </binding>
-            </key>
-
-            <key n="102">
-                <name>f</name>
-                <desc>Fire gun</desc>
-                <binding>
-                    <command>property-assign</command>
-                    <property>controls/armament/trigger</property>
-                    <value>true</value>
-                </binding>
-                <mod-up>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>controls/armament/trigger</property>
-                        <value>false</value>
-                    </binding>
-                </mod-up>
-            </key>
-
-            <key n="104">
-                <name>h</name>
-                <desc>Toggle HUD</desc>
-                <binding>
-                    <command>property-toggle</command>
-                    <property>sim/hud/visibility[1]</property>
-                </binding>
-            </key>
-
-            <key n="113">
-                <name>q</name>
-                <desc>Deploy countermeasures</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>guns.fire_FL()</script>
-                </binding>
-                <mod-up>
-                    <binding>
-                        <command>nasal</command>
-                        <script>guns.stop_FL()</script>
-                    </binding>
-                </mod-up>
-            </key>
-
-            <key n="125">
-                <name>}</name>
-                <desc>Engine Autostart</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>engines.engine1.autostart();</script>
-                </binding>
-            </key>
-
-            <!-- Alt-m moves thrust vector (aka mixture) to hover stop, 82 deg. -->
-            <key n="109">
-                <mod-alt>
-                    <name>Alt-m</name>
-                    <desc>Hover stop</desc>
-                    <binding>
-                        <command>property-interpolate</command>
-                        <property>controls/engines/engine/mixture</property>
-                        <value>0.18</value>
-                        <time>1.0</time>
-                    </binding>
-                </mod-alt>
-            </key>
-            
-            <!-- Alt-0-9 control auto-hover. -->
-            <key n="48">
-                <name>Alt-0</name>
-                <desc>Auto-hover off</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>999</value>
-                    </binding>
-                </mod-alt>
-            </key>
-            <key n="49">
-                <name>Alt-1</name>
-                <desc>Auto-hover speed -4 fps</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>-4</value>
-                    </binding>
-                </mod-alt>
-            </key>
-            <key n="50">
-                <name>Alt-2</name>
-                <desc>Auto-hover speed -3 fps</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>-3</value>
-                    </binding>
-                </mod-alt>
-            </key>
-            <key n="51">
-                <name>Alt-3</name>
-                <desc>Auto-hover speed -2 fps</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>-2</value>
-                    </binding>
-                </mod-alt>
-            </key>
-            <key n="52">
-                <name>Alt-4</name>
-                <desc>Auto-hover speed -1 fps</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>-1</value>
-                    </binding>
-                </mod-alt>
-            </key>
-            <key n="53">
-                <name>Alt-5</name>
-                <desc>Auto-hover maintain current height</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>0</value>
-                    </binding>
-                </mod-alt>
-            </key>
-           <key n="54">
-                <name>Alt-6</name>
-                <desc>Auto-hover speed +1 fps</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>1</value>
-                    </binding>
-                </mod-alt>
-            </key>
-            <key n="55">
-                <name>Alt-7</name>
-                <desc>Auto-hover speed +2 fps</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>2</value>
-                    </binding>
-                </mod-alt>
-            </key>
-             <key n="56">
-                <name>Alt-8</name>
-                <desc>Auto-hover speed +3 fps</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>3</value>
-                    </binding>
-                </mod-alt>
-            </key>
-            <key n="57">
-                <name>Alt-9</name>
-                <desc>Auto-hover speed +4 fps</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/flight/auto-hover</property>
-                        <value>4</value>
-                    </binding>
-                </mod-alt>
-            </key>
-
-        </keyboard>
-    </input>
-
     <!-- Misc Settings -->
     <canopy>
         <position-norm type="double">0</position-norm>
@@ -685,7 +536,6 @@
     <!-- Nasal Scripts -->
     <nasal>
         <Harrier-GR3>
-            <file>Aircraft/Harrier-GR3/Nasal/Controls.nas</file>
             <file>Aircraft/Harrier-GR3/Nasal/Liveries.nas</file>
             <file>Aircraft/Harrier-GR3/Nasal/HUD.nas</file>
         </Harrier-GR3>
@@ -701,6 +551,10 @@
         <Canopy>
             <file>Aircraft/Harrier-GR3/Nasal/Canopy.nas</file>
         </Canopy>
+
+        <autohover>
+            <file>Aircraft/Harrier-GR3/Nasal/autohover.nas</file>
+        </autohover>
 
         <Eject>
             <file>Aircraft/Harrier-GR3/Nasal/eject.nas</file>
