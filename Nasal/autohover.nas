@@ -50,6 +50,8 @@ var in_replay = func() {
     return props.globals.getValue('/sim/replay/replay-state') == 1;
 }
 
+# Returns true if there is weight on wheels.
+#
 var on_ground = func() {
     if (0
             or props.globals.getValue('/gear/gear/wow')
@@ -198,6 +200,21 @@ var auto_hover_speed = {
     },
         
     do: func() {
+        
+        og = on_ground();
+        if (me.on_ground and !og) {
+            # Reset control if we've just left the ground.
+            me.control_smoothed = 0;
+        }
+        
+        if (og and !me.on_ground) {
+            # We have just landed; disable ourselves because auto-hover
+            # horizontal is really unhelpful after landing.
+            props.globals.setValue(sprintf('/controls/auto-hover/%s-mode', me.name), 'off');
+        }
+        
+        me.on_ground = og;
+              
         var mode = props.globals.getValue(sprintf('/controls/auto-hover/%s-mode', me.name));
         
         if (mode == 'off' or mode == 'ground speed pid' or in_replay()) {
@@ -224,13 +241,6 @@ var auto_hover_speed = {
                 me.control_smoothed = 0;
             }
         }
-        
-        og = on_ground();
-        if (!og and me.on_ground) {
-            # Reset control if we've just left the ground.
-            me.control_smoothed = 0;
-        }
-        me.on_ground = og;
 
         var airground_mode = props.globals.getValue(sprintf('/controls/auto-hover/%s-airground-mode', me.name), 0);
         if (airground_mode == 'air')            speed = me.airspeed_get();
