@@ -86,6 +86,42 @@
                 </binding>
             </key>
 
+            <key n="91">
+                <name>[</name>
+                <desc>Decrease flaps</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>controls.incrementProp('/controls/flight/flaps', -0.25, 0, 1, 0.25);</script>
+                </binding>
+            </key>
+
+            <key n="93">
+                <name>]</name>
+                <desc>Increase flaps</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>controls.incrementProp('/controls/flight/flaps', 0.25, 0, 1, 0.25);</script>
+                </binding>
+            </key>
+
+            <key n="106">
+                <name>j</name>
+                <desc>Decrease spoilers</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>controls.incrementProp('/controls/flight/spoilers', -0.25, 0, 1, 0.25);</script>
+                </binding>
+            </key>
+
+            <key n="107">
+                <name>k</name>
+                <desc>Increase spoilers</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>controls.incrementProp('/controls/flight/spoilers', 0.25, 0, 1, 0.25);</script>
+                </binding>
+            </key>
+
             <!-- Alt-m moves thrust vector (aka mixture) to hover stop, 82 deg. -->
             <key n="109">
                 <mod-alt>

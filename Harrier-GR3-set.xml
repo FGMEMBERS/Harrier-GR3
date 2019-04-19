@@ -538,6 +538,7 @@ possible.
         <Harrier-GR3>
             <file>Aircraft/Harrier-GR3/Nasal/Liveries.nas</file>
             <file>Aircraft/Harrier-GR3/Nasal/HUD.nas</file>
+            <file>Aircraft/Harrier-GR3/Nasal/Controls.nas</file>
         </Harrier-GR3>
 
         <lights>
@@ -547,6 +548,10 @@ possible.
         <ENAV>
             <file>Aircraft/Harrier-GR3/Nasal/ENAV.nas</file>
         </ENAV>
+
+        <controls>
+            <file>Aircraft/Harrier-GR3/Nasal/Controls.nas</file>
+        </controls>
 
         <Canopy>
             <file>Aircraft/Harrier-GR3/Nasal/Canopy.nas</file>
