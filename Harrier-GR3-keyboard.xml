@@ -293,6 +293,17 @@
                     </binding>
                 </mod-alt>
             </key>
+            <key n="44">
+                <name>Alt-,</name>
+                <desc>Auto-hover xz: target position</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/xz-target</property>
+                        <value>prime</value>
+                    </binding>
+                </mod-alt>
+            </key>
             <key n="357">
                 <name>Alt-up</name>
                 <desc>Auto-hover z: increment</desc>
@@ -449,19 +460,6 @@
                         <script>autohover.auto_hover_aoa_nozzles_off()</script>
                     </binding>
                 </mod-alt>
-            </key>
-            
-            <!-- experimental -->
-            <key n="100">
-                 <name>Alt-d</name>
-                 <desc>Auto-hover zx move distance</desc>
-                 <mod-alt>
-                     <binding>
-                         <command>property-assign</command>
-                         <property>/controls/auto-hover/xz-mode</property>
-                         <value>distance</value>
-                     </binding>
-                 </mod-alt>
             </key>
 
 </PropertyList>

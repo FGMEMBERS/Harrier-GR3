@@ -29,7 +29,7 @@
             <tag>single-engine</tag>
         </tags>
         <author>Petar Jedvaj, Andy Ross, Gary Brown, StuartC, Raptor, Brendan Black, Julian Smith, Ludovic Brenta</author>
-        <aircraft-version>3.1</aircraft-version>
+        <aircraft-version>3.2</aircraft-version>
         <status>beta</status>
         <rating>
             <FDM type="int">4</FDM>
@@ -320,6 +320,11 @@
                 <name>Alt-o</name>
                 <desc>Auto-hover aoa nozzles: off</desc>
             </key>
+            
+            <key>
+                <name>Alt-,</name>
+                <desc>Auto-hover horizontal target: next click sets target horizontal location.</desc>
+            </key>
 
             <text>
 === Auto-hover vertical ===
@@ -334,10 +339,14 @@ Uses pitch and roll to control forwards/sideways speed.
 Uses rudder to control rotation speed or heading.
 
 === Auto-hover AoA nozzles ===
-
 Uses nozzels to control angle-of-attack; useful if there is not enough thrust
 to hover - suitable target AoA results in as slow an approach speed as
 possible.
+
+=== Auto-hover horizontal target ===
+Allows a click on landscape to set a target horizontal position, and moves
+aircraft to this position. Does not affect altitude.
+
             </text>
             
 

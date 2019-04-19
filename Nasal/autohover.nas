@@ -73,15 +73,45 @@ var make_window = func(x, y) {
         );
     w.bg = [0,0,0,.5]; # black alpha .5 background
     w.fg = [1, 1, 1, 0.5];
+    # Setting font here doesn't appear to make any difference.
+    w.font = getprop("/sim/gui/selected-style/fonts/message-display/name") or "HELVETICA_14";;
+    w.fontsize = 8;
     return w;
 }
 
-var auto_hover_z_window         = make_window( 20, 150);
-var auto_hover_x_window         = make_window( 20, 175);
-var auto_hover_rotation_window  = make_window( 20, 200);
-var auto_rotation_height_window = make_window( 20, 225);
+# Returns text describing target vs actual.
+var make_text = func(actual, target, units, fmt) {
+    var target_text = sprintf(fmt, target);
+    var actual_text = sprintf(fmt, actual);
+    var delta_text = sprintf(fmt, actual - target);
+    delta_text = string.trim(delta_text);
+    c = left(delta_text, 1);
+    if (c == '-') {
+        delta_text = right(delta_text, size(delta_text) - 1);
+    }
+    else if ( c == '+') {
+        delta_text = right(delta_text, size(delta_text) - 1);
+    }
+    else {
+        c = '+';
+    }
+    #if (c != '-' and c != '+') {
+    #    delta_text = '+' ~ delta_text;
+    #    c = left(delta_text, 1);
+    #}
+    #t = sprintf('%s %s (%s%s %s)', actual_text, units, target_text, delta_text, units);
+    t = sprintf('%s %s. (%s %s => %s %s)', target_text, units, c, delta_text, actual_text, units,);
+    return t;
+}
+
+var auto_hover_height_window    = make_window( 20, 125);
+var auto_hover_z_window         = make_window( 20, 100);
+var auto_hover_x_window         = make_window( 20, 75);
+var auto_hover_rotation_window  = make_window( 20, 50);
 
 props.globals.setValue('/controls/auto-hover/z-speed-error', 0);
+
+var auto_hover_target_pos = nil;
 
 
 # Class for setting a control (e.g. an elevator) whose derivitive (wrt to time)
@@ -255,8 +285,8 @@ var auto_hover_speed = {
             speed_target = speed;
             props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target', me.name), speed_target / knots2si);
         }
-
-        if (mode == 'speed' or mode == 'speed' or mode == 'distance') {
+        
+        if (mode == 'speed' or mode == 'target') {
 
             if (me.speed_prev == nil) {
                 me.speed_prev = speed;
@@ -270,51 +300,74 @@ var auto_hover_speed = {
             me.speed_prev = speed;
             me.accel_prev = accel;
 
-            if (mode == 'distance') {
-                # This doesn't work yet.
-                var distance = props.globals.getValue(me.speed_target_name);
-                var distance -= speed * me.period;
-                props.globals.setValue(me.speed_target_name, distance);
-
-                if (0) {
-                    var speed_target = distance / me.t_deriv / 4;
+            if (mode == 'target') {
+                var target_lat = props.globals.getValue('/controls/auto-hover/xz-target-latitude');
+                var target_lon = props.globals.getValue('/controls/auto-hover/xz-target-longitude');
+                var pos_target = geo.Coord.new();
+                pos_target.set_latlon(target_lat, target_lon);
+                var pos_current = geo.aircraft_position();
+                var target_bearing = pos_current.course_to( pos_target);
+                var target_distance = pos_current.distance_to( pos_target);
+                var aircraft_heading = props.globals.getValue('/orientation/heading-deg');
+                var relative_bearing = target_bearing - aircraft_heading;
+                var relative_bearing_rad = relative_bearing * math.pi / 180;
+                
+                # Find target distance relative to the direction we are
+                # controlling. I think this may be slightly wrong - sometimes
+                # the distance increases even though our actual speed is
+                # in the correct direction; maybe we need to factor in the
+                # the attitude to convert our speed into strict horizontal
+                # direction to match our target?
+                #
+                if (me.name == 'z') {
+                    # We are controlling forewards speed.
+                    target_distance = target_distance * math.cos(relative_bearing_rad);
+                    
+                    # Aircraft origin is tip of front boom. Correct so that
+                    # we aim to place the target halfway between the two
+                    # main gears - these are offsets x=-4.91 and x=-8.25 in
+                    # Harrier-GR3.xml. [Why is aircraft fore/aft called 'z' in
+                    # properties, but 'x' in model?]
+                    target_distance += 6.58;
                 }
-                if (0) {
-                    var d2 = distance - speed * me.t_deriv;
-                    var s2 = d2 / me.t_deriv;
-                    var accel_target = (s2 - speed) / me.t_deriv;
-                }
-
-                var accel = 2;
-                var speed_max = accel * me.t_deriv;
-                if (distance < 0)   accel = -accel;
-                t = math.sqrt(2*distance/accel);
-                var tmax = me.t_deriv;
-                if (t > tmax) {
-                    var speed_target = speed_max;
-                    var accel_target = (speed_target - speed) / me.t_deriv;
+                else if (me.name == 'x') {
+                    # We are controlling sideways speed. 
+                    target_distance = target_distance * math.sin(relative_bearing_rad);
                 }
                 else {
-                    var accel_target = -speed*speed / (2*distance);
-                    var speed_target = speed + accel_target * me.t_deriv;
+                    printf('*** unrecognised me.name=%s', me.name);
+                    return;
                 }
-
-                if (distance < 0) {
-                    accel_target = -accel_target;
-                    speed_target = -speed_target;
+                var t_distance = 22.0;
+                var speed_target = target_distance / t_distance;
+                
+                var speed_max = 30 * knots2si;
+                if (me.name == 'x')         speed_max = 20 * knots2si;
+                else if (speed_target < 0)  speed_max = 20 * knots2si;
+                speed_target = clip_abs(speed_target, speed_max);
+                
+                var speed_target_kts = speed_target / knots2si;
+                var accel_target = (speed_target - speed) / me.t_deriv;
+                
+                if (math.sgn(accel_target) != math.sgn(target_distance) and target_distance != 0) {
+                    # If we are deaccelarating, target a constant accel that
+                    # would bring us stationary at the target position. This
+                    # appears to work better than trying to track speed_target.
+                    accel_target = -speed*speed / 2 / target_distance;  
+                    #printf('fixing accel_target=%.2f', accel_target);
                 }
-
-                printf('distance=%.2f speed_max=%.2f t=%.2s speed=%.2f speed_target=%.2f accel=%.2f accel_target=%.2f',
-                        distance,
-                        speed_max,
-                        t,
-                        speed,
-                        speed_target,
-                        accel,
-                        accel_target,
-                        );
-
-                speed_target_kts = speed_target / knots2si;
+                
+                if (0) {
+                    printf('target=%s,%s target_bearing=%.1f target_distance=%.1f aircraft_heading=%.1f relative_bearing=%.1f speed_target=%s kts',
+                            target_lat,
+                            target_lon,
+                            target_bearing,
+                            target_distance,
+                            aircraft_heading,
+                            relative_bearing,
+                            speed_target_kts,
+                            );
+                }
             }
             else {
 
@@ -341,19 +394,17 @@ var auto_hover_speed = {
 
             if (1) {
 
-                # Don't try to accelarate too much - can end up over-pitching.
+                # Don't try to accelerate too much - can end up over-pitching.
                 var accel_target_max = 0.5 + 0.1 * math.sqrt(abs(speed));
                 accel_target = clip_abs(accel_target, accel_target_max);
-                var text = sprintf('auto-hover: %s %s:', me.name_user, mode);
-                if (mode == 'distance') {
-                    text = sprintf('%s distance=%.2f.', text, distance);
+                var text = sprintf('auto-hover: %s:', me.name_user);
+                if (mode == 'target') {
+                    text = sprintf('%s %.1f m.', text, target_distance);
                 }
                 text = sprintf(
-                        '%s target=% .2f kts actual=% .2f kts (%+.2f kts)',
+                        '%s %s',
                         text,
-                        speed_target_kts,
-                        speed / knots2si,
-                        (speed - speed_target) / knots2si,
+                        make_text(speed / knots2si, speed_target_kts, 'kts', '%+.2f'),
                         );
 
                 me.window.write(text);
@@ -400,6 +451,11 @@ var auto_hover_speed = {
             }
             # We store the control setting in our state so that we overwrite
             # any changes by the user.
+            
+            pos = geo.click_position();
+            if (pos != nil) {
+                #pos.dump();
+            }
         }
         
         settimer( func { me.do()}, me.period);
@@ -418,8 +474,15 @@ z_speed = auto_hover_speed.new(
             return props.globals.getValue('/velocities/equivalent-kt') * knots2si;
         },
         groundspeed_get: func () {
-            # Forwards ground-speed.
-            return props.globals.getValue('/velocities/uBody-fps') * ft2si;
+            # We return the forwards ground-speed. Note that uBody-fps is
+            # speed along longitudal axis of aircraft, which is different from
+            # forwards ground speed if attitude is not zero deg.
+            var w = props.globals.getValue('/velocities/wBody-fps');
+            var u = props.globals.getValue('/velocities/uBody-fps');
+            var attitude_deg = props.globals.getValue('/orientation/pitch-deg');
+            var attitude = attitude_deg * math.pi / 180;
+            var ret = u * math.cos(attitude) + w * math.sin(attitude);
+            return ret * ft2si;
         },
         control_name: '/controls/flight/elevator',
         control_smoothing: 0.015,
@@ -595,26 +658,22 @@ var auto_hover_rotation = {
 
             var accel_target = (speed_target - speed) / me.t_deriv;
 
-            # Don't try to accelarate too much - can end up unstable.
+            # Don't try to accelerate too much - can end up unstable.
             var accel_target_max = 0.2;
             accel_target = clip_abs(accel_target, accel_target_max);
             var text = sprintf('auto-hover: %s:', me.name);
             if (mode == 'heading') {
                 text = sprintf(
-                        '%s target heading=% .1f deg, actual=% .1f deg (%+.1f deg)',
+                        '%s %s',
                         text,
-                        heading_target,
-                        heading,
-                        heading - heading_target,
+                        make_text(heading, heading_target, 'deg', '%.1f'),
                         );
             }
             else {
                 text = sprintf(
-                        '%s rotation speed=% .1f deg/s, actual=% .1f deg/s (%+.1f deg/s)',
+                        '%s %s',
                         text,
-                        speed_target,
-                        speed,
-                        speed - speed_target,
+                        make_text(speed, speed_target, 'deg/s', '%+.1f'),
                         );
             }
             me.window.write(text);
@@ -827,10 +886,8 @@ var auto_hover_height = {
 
                 me.window.write(
                         sprintf(
-                                'auto-hover: height: target=%.2f ft actual=%.2f ft (%+.2f ft)',
-                                me.height_target / ft2si,
-                                height_ft,
-                                height_ft - me.height_target / ft2si,
+                                'auto-hover: vertical: %s',
+                                make_text(height_ft, me.height_target / ft2si, 'ft', '%.2f'),
                                 )
                         );
             }
@@ -838,14 +895,6 @@ var auto_hover_height = {
             {
                 # Use target vertical speed directly.
                 speed_target = mode * ft2si;
-                if (0) me.window.write(
-                        sprintf(
-                                'auto-hover: vertical speed: target=%.2f fps actual=%.2f fps (%+.2f fps)',
-                                mode,
-                                speed_fps,
-                                speed_fps - mode,
-                                )
-                        );
             }
 
             # Decide on a target vertical acceleration to get us to the target
@@ -1093,10 +1142,8 @@ var auto_hover_height = {
                 }
                 me.window.write(
                         sprintf(
-                                'auto-hover: vertical speed: target=% .2f fps actual=% .2f fps (%+.2f fps)%s',
-                                mode,
-                                speed_fps,
-                                speed_fps - mode,
+                                'auto-hover: vertical: %s%s',
+                                make_text(speed_fps, mode, 'fps', '%+.2f'),
                                 override_text_1,
                                 )
                         );
@@ -1113,7 +1160,7 @@ var auto_hover_height = {
 var height = auto_hover_height.new(
         period: 0.25,
         mode_name: '/controls/auto-hover/y-target',
-        window: auto_rotation_height_window,
+        window: auto_hover_height_window,
         );
 
 
@@ -1136,3 +1183,52 @@ var auto_hover_aoa_nozzles_off = func() {
     props.globals.setValue('/controls/auto-hover/aoa-nozzles-target', '');
     auto_hover_aoa_nozzles_window.write('');
 }
+
+#var auto_hover_xz_target_pos_old = nil;
+var auto_hover_xz_target_lat_old = nil;
+var auto_hover_xz_target_lon_old = nil;
+props.globals.setValue('/controls/auto-hover/xz-target', '');
+
+var auto_hover_xz_target = func() {
+    var xz_target = props.globals.getValue('/controls/auto-hover/xz-target', 0);
+    #printf('xz_target=%s', xz_target);
+    if (xz_target == 'prime') {
+        var pos = geo.click_position();
+        if (pos != nil) {
+            auto_hover_xz_target_lat_old = pos.lat();
+            auto_hover_xz_target_lon_old = pos.lon();
+        }
+        props.globals.setValue('/controls/auto-hover/xz-target', 'prime-2');
+    }
+    else if (xz_target == 'prime-2') {
+        var pos = geo.click_position();
+        if (pos != nil
+                and (
+                    pos.lat() != auto_hover_xz_target_lat_old
+                    or
+                    pos.lon() != auto_hover_xz_target_lon_old
+                    )
+                ) {
+            #if (auto_hover_xz_target_pos_old != nil) {
+            #    printf('old xz_target: lat=%s lon=%s', auto_hover_xz_target_pos_old.lat(), auto_hover_xz_target_pos_old.lon());
+            #}
+            #printf('auto_hover_xz_target_lat_old=%s auto_hover_xz_target_lon_old=%s',
+            #        auto_hover_xz_target_lat_old,
+            #        auto_hover_xz_target_lon_old,
+            #        );
+            #auto_hover_xz_target_pos_old = pos;
+            auto_hover_xz_target_lat_old = pos.lat();
+            auto_hover_xz_target_lon_old = pos.lon();
+            props.globals.setValue('/controls/auto-hover/xz-target', '');
+            props.globals.setValue('/controls/auto-hover/xz-target-latitude', pos.lat());
+            props.globals.setValue('/controls/auto-hover/xz-target-longitude', pos.lon());
+            props.globals.setValue('/controls/auto-hover/x-mode', 'target');
+            props.globals.setValue('/controls/auto-hover/z-mode', 'target');
+            printf('new xz_target: lat=%s lon=%s', pos.lat(), pos.lon());
+        }
+    }
+    
+    settimer( func { auto_hover_xz_target()}, 2);
+}
+
+auto_hover_xz_target();
