@@ -115,11 +115,13 @@ var speed_correction = func() {
     return sc;
 }
 
+var auto_hover_aoa_nozzles_window       = make_window( 20, 175);
 var auto_hover_xz_target_prime_window   = make_window( 20, 150);
 var auto_hover_height_window            = make_window( 20, 125);
 var auto_hover_z_window                 = make_window( 20, 100);
 var auto_hover_x_window                 = make_window( 20, 75);
 var auto_hover_rotation_window          = make_window( 20, 50);
+
 
 props.globals.setValue('/controls/auto-hover/z-speed-error', 0);
 
@@ -1256,8 +1258,6 @@ var auto_hover_y_off = func() {
 }
 
 
-
-var auto_hover_aoa_nozzles_window = make_window( 20, 250);
 
 var auto_hover_aoa_nozzles_change = func(delta) {
     target = props.globals.getValue('/controls/auto-hover/aoa-nozzles-target');
