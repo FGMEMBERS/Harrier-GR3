@@ -423,20 +423,9 @@
             </key>
             
             <!-- AoA -->
-            <key n="364">
-                <name>Insert</name>
-                <desc>Auto-hover aoa: reduce</desc>
-                <mod-alt>
-                    <binding>
-                        <command>nasal</command>
-                        <script>autohover.auto_hover_aoa_nozzles_change(-0.5)</script>
-                    </binding>
-                </mod-alt>
-            </key>
-            
             <key n="127">
-                <name>Delete</name>
-                <desc>Auto-hover aoa: increase</desc>
+                <name>Alt-Delete</name>
+                <desc>Auto-hover aoa: increment target AoA</desc>
                 <mod-alt>
                     <binding>
                         <command>nasal</command>
@@ -445,8 +434,41 @@
                 </mod-alt>
             </key>
             
+            <key n="120">
+                <name>Alt-x</name>
+                <desc>Auto-hover aoa: increment target AoA</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_aoa_nozzles_change(0.5)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <key n="364">
+                <name>Alt-Insert</name>
+                <desc>Auto-hover aoa: decrement target AoA</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_aoa_nozzles_change(-0.5)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <key n="122">
+                <name>Alt-z</name>
+                <desc>Auto-hover aoa: decrement target AoA</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_aoa_nozzles_change(-0.5)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
             <key n="111">
-                <name>o</name>
+                <name>Alt-o</name>
                 <desc>Auto-hover aoa: off</desc>
                 <mod-alt>
                     <binding>

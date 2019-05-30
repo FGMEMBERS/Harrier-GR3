@@ -309,11 +309,11 @@
             </key>
             
             <key>
-                <name>Alt-Insert</name>
+                <name>Alt-Insert or Alt-z</name>
                 <desc>Auto-hover aoa nozzles: decrement target angle of attack</desc>
             </key>
             <key>
-                <name>Delete</name>
+                <name>Alt-Delete or Alt-x</name>
                 <desc>Auto-hover aoa nozzles: increment target angle of attack</desc>
             </key>
             <key>
