@@ -398,16 +398,32 @@ var auto_hover_speed = {
                 var accel_target_max = 0.5 + 0.1 * math.sqrt(abs(speed));
                 accel_target = clip_abs(accel_target, accel_target_max);
                 var text = sprintf('auto-hover: %s:', me.name_user);
+                var highlight = 0;
                 if (mode == 'target') {
                     text = sprintf('%s %.1f m.', text, target_distance);
+                    if (auto_hover_xz_target_recent_change > 0) {
+                        # Next line makes us flashe the new value, but looks a bit clunky.
+                        #highlight = math.mod( math.round(auto_hover_xz_target_recent_change / 2), 2);
+                        highlight = 1;
+                        if (me.name == 'x') {
+                            auto_hover_xz_target_recent_change -= 1;
+                        }
+                    }
                 }
                 text = sprintf(
                         '%s %s',
                         text,
                         make_text(speed / knots2si, speed_target_kts, 'kts', '%+.2f'),
                         );
-
-                me.window.write(text);
+                if (highlight) {
+                    fg = me.window.fg;
+                    me.window.fg = [1, 0, 0, 0.5];
+                    me.window.write(text);
+                    me.window.fg = fg;
+                }
+                else {
+                    me.window.write(text);
+                }
             }
 
             # Set daccel_target by looking at accel target vs actual, using
@@ -451,11 +467,6 @@ var auto_hover_speed = {
             }
             # We store the control setting in our state so that we overwrite
             # any changes by the user.
-            
-            pos = geo.click_position();
-            if (pos != nil) {
-                #pos.dump();
-            }
         }
         
         settimer( func { me.do()}, me.period);
@@ -1184,11 +1195,13 @@ var auto_hover_aoa_nozzles_off = func() {
     auto_hover_aoa_nozzles_window.write('');
 }
 
-#var auto_hover_xz_target_pos_old = nil;
 var auto_hover_xz_target_lat_old = nil;
 var auto_hover_xz_target_lon_old = nil;
+var auto_hover_xz_target_recent_change = 0;
 props.globals.setValue('/controls/auto-hover/xz-target', '');
 
+# This function sets up target position in response to clicks on scenery.
+#
 var auto_hover_xz_target = func() {
     var xz_target = props.globals.getValue('/controls/auto-hover/xz-target', 0);
     #printf('xz_target=%s', xz_target);
@@ -1209,14 +1222,6 @@ var auto_hover_xz_target = func() {
                     pos.lon() != auto_hover_xz_target_lon_old
                     )
                 ) {
-            #if (auto_hover_xz_target_pos_old != nil) {
-            #    printf('old xz_target: lat=%s lon=%s', auto_hover_xz_target_pos_old.lat(), auto_hover_xz_target_pos_old.lon());
-            #}
-            #printf('auto_hover_xz_target_lat_old=%s auto_hover_xz_target_lon_old=%s',
-            #        auto_hover_xz_target_lat_old,
-            #        auto_hover_xz_target_lon_old,
-            #        );
-            #auto_hover_xz_target_pos_old = pos;
             auto_hover_xz_target_lat_old = pos.lat();
             auto_hover_xz_target_lon_old = pos.lon();
             props.globals.setValue('/controls/auto-hover/xz-target', '');
@@ -1224,11 +1229,12 @@ var auto_hover_xz_target = func() {
             props.globals.setValue('/controls/auto-hover/xz-target-longitude', pos.lon());
             props.globals.setValue('/controls/auto-hover/x-mode', 'target');
             props.globals.setValue('/controls/auto-hover/z-mode', 'target');
+            auto_hover_xz_target_recent_change = 20;
             printf('new xz_target: lat=%s lon=%s', pos.lat(), pos.lon());
         }
     }
     
-    settimer( func { auto_hover_xz_target()}, 2);
+    settimer( func { auto_hover_xz_target()}, 0.2);
 }
 
 auto_hover_xz_target();
