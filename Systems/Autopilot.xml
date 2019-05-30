@@ -650,10 +650,27 @@
         </enable>
         <debug>false</debug>
         <input>
-            <prop>/orientation/alpha-deg</prop>
+            <!--
+            We primarily target AoA aka /orientation/alpha-deg, but we multiply
+            by cos(roll-deg) to crudely attempt to look at only the vertical
+            component of the AoA; this helps to avoids unhelpful increases in
+            speed via nozzles when we are turning.
+            -->
+            <expression>
+                <product>
+                    <cos>
+                        <product>
+                            <property>/orientation/roll-deg</property>
+                            <value>0.01745329</value>
+                        </product>
+                    </cos>
+                    <property>/orientation/alpha-deg</property>
+                    <value>1</value>
+                </product>
+            </expression>
         </input>
         <reference>
-            <prop>/controls/auto-hover/aoa-nozzles-target</prop>
+            <property>/controls/auto-hover/aoa-nozzles-target</property>
         </reference>
         <output>
             <prop>/controls/engines/engine/mixture</prop>
