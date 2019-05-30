@@ -125,7 +125,24 @@ props.globals.setValue('/controls/auto-hover/z-speed-error', 0);
 
 var auto_hover_target_pos = nil;
 
-var auto_hover_z_offset = 6.58;
+
+# Sets property if it is currently nil. Useful to allow override from
+# command-line with --prop:<name>=<value>.
+#
+var set_if_nil = func(name, value) {
+    v = props.globals.getValue(name);
+    if (v == nil) {
+        props.globals.setValue(name, value);
+    }
+}
+
+set_if_nil('/controls/auto-hover/z_offset', 6.58);
+var get_auto_hover_z_offset = func() {
+    return props.globals.getValue('/controls/auto-hover/z_offset');
+}
+
+#var auto_hover_z_offset = 6.58;
+#auto_hover_z_offset = 0;
 # Distance from aircraft origin (the tip of the boom) and midpoint between
 # the two main wheels. Used to allows us to place wheel midpoint at target
 # position.
@@ -236,10 +253,11 @@ var auto_hover_speed = {
         me.on_ground = on_ground();
         
         m.mode_prev = 'off';
-        props.globals.setValue(sprintf('/controls/auto-hover/%s-mode', m.name), m.mode_prev);
-        props.globals.setValue(sprintf('/controls/auto-hover/%s-airground-mode', m.name), 'ground');
-        props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target', m.name), '');
-        props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target-delta', m.name), '');
+        set_if_nil(sprintf('/controls/auto-hover/%s-mode', m.name), m.mode_prev);
+        set_if_nil(sprintf('/controls/auto-hover/%s-mode', m.name), m.mode_prev);
+        set_if_nil(sprintf('/controls/auto-hover/%s-airground-mode', m.name), 'ground');
+        set_if_nil(sprintf('/controls/auto-hover/%s-speed-target', m.name), '');
+        set_if_nil(sprintf('/controls/auto-hover/%s-speed-target-delta', m.name), '');
         
         m.control = 0;
         m.control_smoothed = 0;
@@ -348,7 +366,7 @@ var auto_hover_speed = {
                     # Aircraft origin is tip of front boom. Correct so that
                     # we aim to place the target halfway between the two
                     # main gears.
-                    target_distance += auto_hover_z_offset;
+                    target_distance += get_auto_hover_z_offset();
                 }
                 else if (me.name == 'x') {
                     # We are controlling sideways speed. 
@@ -836,7 +854,7 @@ var auto_hover_height = {
         m.window = window;
         
         m.mode_prev = 'off';
-        props.globals.setValue(m.mode_name, m.mode_prev);
+        set_if_nil(m.mode_name, m.mode_prev);
         
         # Schedule the first call to m.do().
         settimer( func { m.do()}, 0);
@@ -877,18 +895,23 @@ var auto_hover_height = {
 
             var throttle = props.globals.getValue('/controls/engines/engine/throttle');
 
-            if (mode != me.mode_prev)
-            {
-                # We have changed to a new hover-mode.
-                if (mode == 'current') {
-                    me.height_target = height;
-                    # Use current height as target.
-                    #window.write(sprintf('auto-hover: target height: %.1f ft', height_ft));
-                }
-                else {
-                    #window.write(sprintf('auto-hover: target vertical speed: %.1f fps', auto_hover));
-                }
-            }
+            var speed_target = nil;
+            var height_target = nil;
+            
+            #if (mode != me.mode_prev)
+            #{
+            #    # We have changed to a new hover-mode.
+            #    if (mode == 'current') {
+            #        #me.height_target = height;
+            #        #props.globals.setValue('/controls/auto-hover/y-target-height', height);
+            #        # Use current height as target.
+            #        #window.write(sprintf('auto-hover: target height: %.1f ft', height_ft));
+            #    }
+            #    else {
+            #        props.globals.setValue(me.mode_name, 'speed');
+            #        #window.write(sprintf('auto-hover: target vertical speed: %.1f fps', auto_hover));
+            #    }
+            #}
 
             if (me.mode_prev == 'off') {
                 # Starting auto-hover. Need to initialise smoothed variables to
@@ -899,7 +922,7 @@ var auto_hover_height = {
 
             # Find target vertical speed:
             #
-            if (mode == 'current') {
+            if (mode == 'height') {
 
                 # Calculate desired vertical speed by comparing target height and
                 # current height.
@@ -908,7 +931,9 @@ var auto_hover_height = {
                 # This is vaguely a time in seconds over which we will try to reach
                 # target height.
 
-                speed_target = (me.height_target - height) / t;
+                var height_target_ft = props.globals.getValue('/controls/auto-hover/y-height');
+                height_target = height_target_ft * ft2si;
+                speed_target = (height_target - height) / t;
                 # Our target vertical speed. Approaches zero as we reach target
                 # height.
 
@@ -922,14 +947,15 @@ var auto_hover_height = {
                 me.window.write(
                         sprintf(
                                 'auto-hover: vertical: %s',
-                                make_text(height_ft, me.height_target / ft2si, 'ft', '%.2f'),
+                                make_text(height_ft, height_target / ft2si, 'ft', '%.2f'),
                                 )
                         );
             }
             else
             {
                 # Use target vertical speed directly.
-                speed_target = mode * ft2si;
+                var speed_target_fps = props.globals.getValue('/controls/auto-hover/y-speed');
+                speed_target = speed_target_fps * ft2si;
             }
 
             # Decide on a target vertical acceleration to get us to the target
@@ -969,7 +995,7 @@ var auto_hover_height = {
                 # crashing into ground.
                 #
                 # We don't bother to try to correct for vertical air
-                # resistence, though this means we may slightly overderestimate
+                # resistence, though this means we may slightly overestimate
                 # the maximum deaccelaration we can achieve.
                 
                 
@@ -1075,7 +1101,12 @@ var auto_hover_height = {
                         # and get unstable (unless we kill the engine, but not
                         # sure we should automate that).
                         #
-                        props.globals.setValue(me.mode_name, 'current');
+                        props.globals.setValue(me.mode_name, 'height');
+                        props.globals.setValue('/controls/auto-hover/y-height', height_ft);
+                        
+                        # Reset target vertical speed to zero in case user
+                        # re-enables it.
+                        props.globals.setValue('/controls/auto-hover/y-speed', 0);
                         override_text_1 = ' #';
                     }
                 }
@@ -1148,7 +1179,7 @@ var auto_hover_height = {
                 # Brief diagnostics.
                 if (auto_hover == 0) {
                     printf('auto-hover: height: target=%.1f ft, actual=%.1f ft. vertical speed=%.2f fps.',
-                            me.height_target / ft2si,
+                            height_target / ft2si,
                             height / ft2si,
                             speed / ft2si,
                             );
@@ -1167,7 +1198,7 @@ var auto_hover_height = {
                 props.globals.setValue('/controls/engines/engine/throttle', throttle_target);
             }
             
-            if (mode != 'current') {
+            if (mode == 'speed') {
                 if (override_text_1 != '') {
                     override_text_1 = sprintf('%s throttle=%.2f speed_critical=%.1f fps',
                             override_text_1,
@@ -1178,7 +1209,7 @@ var auto_hover_height = {
                 me.window.write(
                         sprintf(
                                 'auto-hover: vertical: %s%s',
-                                make_text(speed_fps, mode, 'fps', '%+.2f'),
+                                make_text(speed_fps, speed_target / ft2si, 'fps', '%+.2f'),
                                 override_text_1,
                                 )
                         );
@@ -1194,9 +1225,31 @@ var auto_hover_height = {
 
 var height = auto_hover_height.new(
         period: 0.25,
-        mode_name: '/controls/auto-hover/y-target',
+        mode_name: '/controls/auto-hover/y-mode',
         window: auto_hover_height_window,
         );
+
+var auto_hover_y_current = func() {
+    var height_ft = props.globals.getValue('/position/altitude-ft');
+    props.globals.setValue('/controls/auto-hover/y-height', height_ft);
+    props.globals.setValue('/controls/auto-hover/y-mode', 'height');
+}
+
+var auto_hover_y_speed_set = func(speed) {
+    props.globals.setValue('/controls/auto-hover/y-speed', speed);
+    props.globals.setValue('/controls/auto-hover/y-mode', 'speed');
+}
+
+var auto_hover_y_speed_delta = func(delta) {
+    props.globals.setValue('/controls/auto-hover/y-mode', 'speed');
+    speed = props.globals.getValue('/controls/auto-hover/y-speed');
+    speed += delta;
+    props.globals.setValue('/controls/auto-hover/y-speed', speed);
+}
+
+var auto_hover_y_off = func() {
+    props.globals.setValue('/controls/auto-hover/y-mode', 'off');
+}
 
 
 
@@ -1270,7 +1323,7 @@ var auto_hover_xz_target = func() {
             var pos = geo.aircraft_position();
             var aircraft_heading = props.globals.getValue('/orientation/heading-deg');
             # Use midpoint between the main gears:
-            pos.apply_course_distance( aircraft_heading, -auto_hover_z_offset);
+            pos.apply_course_distance( aircraft_heading, -get_auto_hover_z_offset());
         }
         
         if (pos != nil) {

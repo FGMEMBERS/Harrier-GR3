@@ -142,20 +142,8 @@
                 <desc>Auto-hover y: off</desc>
                 <mod-alt>
                     <binding>
-                        <command>property-assign</command>
-                        <property>/controls/auto-hover/y-target</property>
-                        <value>off</value>
-                    </binding>
-                </mod-alt>
-            </key>
-            <key n="86">
-                <name>Alt-V</name>
-                <desc>Auto-hover y: on (zero fps)</desc>
-                <mod-alt>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>/controls/auto-hover/y-target</property>
-                        <value>current</value>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_off()</script>
                     </binding>
                 </mod-alt>
             </key>
@@ -164,9 +152,8 @@
                 <desc>Auto-hover y: set target to zero fps</desc>
                 <mod-alt>
                     <binding>
-                        <command>property-assign</command>
-                        <property>/controls/auto-hover/y-target</property>
-                        <value>0</value>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_speed_set(0)</script>
                     </binding>
                 </mod-alt>
             </key>
@@ -175,9 +162,8 @@
                 <desc>Auto-hover y: maintain current height</desc>
                 <mod-alt>
                     <binding>
-                        <command>property-assign</command>
-                        <property>/controls/auto-hover/y-target</property>
-                        <value>current</value>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_current()</script>
                     </binding>
                 </mod-alt>
             </key>
@@ -187,9 +173,8 @@
                 <desc>Auto-hover y: increment</desc>
                 <mod-alt>
                     <binding>
-                        <command>property-adjust</command>
-                        <property>/controls/auto-hover/y-target</property>
-                        <step>1</step>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_speed_delta(1)</script>
                     </binding>
                 </mod-alt>
             </key>
@@ -199,9 +184,8 @@
                 <desc>Auto-hover y: decrement</desc>
                 <mod-alt>
                     <binding>
-                        <command>property-adjust</command>
-                        <property>/controls/auto-hover/y-target</property>
-                        <step>-1</step>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_speed_delta(-1)</script>
                     </binding>
                 </mod-alt>
             </key>
