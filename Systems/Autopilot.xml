@@ -642,19 +642,25 @@
         <name>Nozzle aoa: control angle-of-attach with nozzles</name>
         <enable>
             <condition>
-                <not-equals>
-                    <property>/controls/auto-hover/aoa-nozzles-target</property>
-                    <value></value>
-                </not-equals>
+                <and>
+                    <not-equals>
+                        <property>/controls/auto-hover/aoa-nozzles-target</property>
+                        <value></value>
+                    </not-equals>
+                    <equals>
+                        <property>/gear/gear[1]/wow</property>
+                        <value>false</value>
+                    </equals>
+                </and>
             </condition>
         </enable>
         <debug>false</debug>
         <input>
             <!--
-            We primarily target AoA aka /orientation/alpha-deg, but we multiply
+            We primarily target AoA, /orientation/alpha-deg, but we multiply
             by cos(roll-deg) to crudely attempt to look at only the vertical
-            component of the AoA; this helps to avoids unhelpful increases in
-            speed via nozzles when we are turning.
+            component of the AoA; this reduces unhelpful increases in speed via
+            nozzles when we are turning.
             -->
             <expression>
                 <product>
