@@ -104,15 +104,25 @@ var make_text = func(actual, target, units, fmt) {
     return t;
 }
 
-var auto_hover_height_window    = make_window( 20, 125);
-var auto_hover_z_window         = make_window( 20, 100);
-var auto_hover_x_window         = make_window( 20, 75);
-var auto_hover_rotation_window  = make_window( 20, 50);
+var auto_hover_xz_target_prime_window   = make_window( 20, 150);
+var auto_hover_height_window            = make_window( 20, 125);
+var auto_hover_z_window                 = make_window( 20, 100);
+var auto_hover_x_window                 = make_window( 20, 75);
+var auto_hover_rotation_window          = make_window( 20, 50);
 
 props.globals.setValue('/controls/auto-hover/z-speed-error', 0);
 
 var auto_hover_target_pos = nil;
 
+var auto_hover_z_offset = 6.58;
+# Distance from aircraft origin (the tip of the boom) and midpoint between
+# the two main wheels. Used to allows us to place wheel midpoint at target
+# position.
+#
+# See Harrier-GR3.xml for offsets of two main gears - these are offsets x=-4.91
+# and x=-8.25.
+#
+# [Why is aircraft fore/aft called 'z' in properties, but 'x' in model?]
 
 # Class for setting a control (e.g. an elevator) whose derivitive (wrt to time)
 # is proportional to third derivitive (wrt time) of a target value (typically a
@@ -326,10 +336,8 @@ var auto_hover_speed = {
                     
                     # Aircraft origin is tip of front boom. Correct so that
                     # we aim to place the target halfway between the two
-                    # main gears - these are offsets x=-4.91 and x=-8.25 in
-                    # Harrier-GR3.xml. [Why is aircraft fore/aft called 'z' in
-                    # properties, but 'x' in model?]
-                    target_distance += 6.58;
+                    # main gears.
+                    target_distance += auto_hover_z_offset;
                 }
                 else if (me.name == 'x') {
                     # We are controlling sideways speed. 
@@ -1201,6 +1209,23 @@ var auto_hover_xz_target_lon_old = nil;
 var auto_hover_xz_target_recent_change = 0;
 props.globals.setValue('/controls/auto-hover/xz-target', '');
 
+
+# Handles Alt-, so that next click sets target position. We cancel if Alt-, is
+# pressed twice.
+var auto_hover_xz_target_click = func() {
+    var xz_target = props.globals.getValue('/controls/auto-hover/xz-target', 0);
+    if (xz_target == 'prime' or xz_target == 'prime-2') {
+        # Cancel.
+        props.globals.setValue('/controls/auto-hover/xz-target', '');
+        auto_hover_xz_target_prime_window.write('');
+    }
+    else {
+        props.globals.setValue('/controls/auto-hover/xz-target', 'prime');
+        auto_hover_xz_target_prime_window.write('auto-hover: horizontal: next click sets target position...');
+    }
+}
+
+
 # This function sets up target position in response to clicks on scenery.
 #
 var auto_hover_xz_target = func() {
@@ -1214,15 +1239,26 @@ var auto_hover_xz_target = func() {
         }
         props.globals.setValue('/controls/auto-hover/xz-target', 'prime-2');
     }
-    else if (xz_target == 'prime-2') {
-        var pos = geo.click_position();
-        if (pos != nil
-                and (
-                    pos.lat() != auto_hover_xz_target_lat_old
-                    or
-                    pos.lon() != auto_hover_xz_target_lon_old
-                    )
-                ) {
+    else {
+        var pos = nil;
+        
+        if (xz_target == 'prime-2') {
+            pos = geo.click_position();
+            if (pos != nil
+                    and pos.lat() == auto_hover_xz_target_lat_old
+                    and pos.lon() == auto_hover_xz_target_lon_old
+                    ) {
+                pos = nil;
+            }
+        }
+        else if (xz_target == 'current') {
+            var pos = geo.aircraft_position();
+            var aircraft_heading = props.globals.getValue('/orientation/heading-deg');
+            # Use midpoint between the main gears:
+            pos.apply_course_distance( aircraft_heading, -auto_hover_z_offset);
+        }
+        
+        if (pos != nil) {
             auto_hover_xz_target_lat_old = pos.lat();
             auto_hover_xz_target_lon_old = pos.lon();
             props.globals.setValue('/controls/auto-hover/xz-target', '');
@@ -1232,6 +1268,7 @@ var auto_hover_xz_target = func() {
             props.globals.setValue('/controls/auto-hover/z-mode', 'target');
             auto_hover_xz_target_recent_change = 20;
             printf('new xz_target: lat=%s lon=%s', pos.lat(), pos.lon());
+            auto_hover_xz_target_prime_window.write('');
         }
     }
     

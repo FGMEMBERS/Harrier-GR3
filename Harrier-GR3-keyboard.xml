@@ -295,12 +295,22 @@
             </key>
             <key n="44">
                 <name>Alt-,</name>
-                <desc>Auto-hover xz: target position</desc>
+                <desc>Auto-hover xz: target click position</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_xz_target_click()</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="47">
+                <name>Alt-/</name>
+                <desc>Auto-hover xz: target current position</desc>
                 <mod-alt>
                     <binding>
                         <command>property-assign</command>
                         <property>/controls/auto-hover/xz-target</property>
-                        <value>prime</value>
+                        <value>current</value>
                     </binding>
                 </mod-alt>
             </key>

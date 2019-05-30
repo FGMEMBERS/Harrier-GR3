@@ -325,6 +325,11 @@
                 <name>Alt-,</name>
                 <desc>Auto-hover horizontal target: next click sets target horizontal location.</desc>
             </key>
+            
+            <key>
+                <name>Alt-/</name>
+                <desc>Auto-hover horizontal target: target current horizontal location.</desc>
+            </key>
 
             <text>
 === Auto-hover vertical ===
@@ -345,10 +350,9 @@ possible.
 
 === Auto-hover horizontal target ===
 Allows a click on landscape to set a target horizontal position, and moves
-aircraft to this position. Does not affect altitude.
-
+aircraft to this position, or targets current position. Does not affect
+altitude.
             </text>
-            
 
         </help>
 
