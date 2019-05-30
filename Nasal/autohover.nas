@@ -262,7 +262,7 @@ var auto_hover_speed = {
             # We are disabled.
             if (me.mode_prev != mode) {
                 me.mode_prev = mode;
-                me.window.write('');
+                me.window.close();
                 props.globals.setValue(sprintf('/controls/auto-hover/%s-speed-target', me.name), '');
             }
             # Don't be called too frequently if we are disabled.
@@ -642,7 +642,7 @@ var auto_hover_rotation = {
         else if (mode == nil or mode == '') {
             active = 0;
             if (me.mode_prev != mode) {
-                me.window.write('');
+                me.window.close();
             }
         }
         else {
@@ -834,7 +834,7 @@ var auto_hover_height = {
         var mode = props.globals.getValue(me.mode_name);
         
         if (mode == 'off' or in_replay()) {
-            if (me.mode_prev != mode)   me.window.write('');
+            if (me.mode_prev != mode)   me.window.close();
             settimer( func { me.do()}, 0.5);
             return;
         }
@@ -1201,7 +1201,7 @@ var auto_hover_aoa_nozzles_change = func(delta) {
 
 var auto_hover_aoa_nozzles_off = func() {
     props.globals.setValue('/controls/auto-hover/aoa-nozzles-target', '');
-    auto_hover_aoa_nozzles_window.write('');
+    auto_hover_aoa_nozzles_window.close();
 }
 
 var auto_hover_xz_target_lat_old = nil;
@@ -1217,7 +1217,7 @@ var auto_hover_xz_target_click = func() {
     if (xz_target == 'prime' or xz_target == 'prime-2') {
         # Cancel.
         props.globals.setValue('/controls/auto-hover/xz-target', '');
-        auto_hover_xz_target_prime_window.write('');
+        auto_hover_xz_target_prime_window.close();
     }
     else {
         props.globals.setValue('/controls/auto-hover/xz-target', 'prime');
@@ -1268,7 +1268,7 @@ var auto_hover_xz_target = func() {
             props.globals.setValue('/controls/auto-hover/z-mode', 'target');
             auto_hover_xz_target_recent_change = 20;
             printf('new xz_target: lat=%s lon=%s', pos.lat(), pos.lon());
-            auto_hover_xz_target_prime_window.write('');
+            auto_hover_xz_target_prime_window.close();
         }
     }
     
