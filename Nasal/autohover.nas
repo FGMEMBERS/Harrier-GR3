@@ -104,6 +104,17 @@ var make_text = func(actual, target, units, fmt) {
     return t;
 }
 
+# An hack to allow us to modify behaviour at high speeds. Doesn't really work
+# yet.
+#
+var speed_correction = func() {
+    var s = props.globals.getValue('/velocities/equivalent-kt') * knots2si;
+    s -= 70 * knots2si;
+    if (s < 0) return 0;
+    var sc = math.sqrt( s / (600*knots2si));
+    return sc;
+}
+
 var auto_hover_xz_target_prime_window   = make_window( 20, 150);
 var auto_hover_height_window            = make_window( 20, 125);
 var auto_hover_z_window                 = make_window( 20, 100);
@@ -271,7 +282,7 @@ var auto_hover_speed = {
         }
         
         # We are active.
-        if (me.debug)   printf("me=%s mode=%s me.mode_prev=%s", me, mode, me.mode_prev);
+        if (0 and me.debug) printf("me=%s mode=%s me.mode_prev=%s", me, mode, me.mode_prev);
 
         if (mode != me.mode_prev) {
             me.mode_prev = mode;
@@ -290,7 +301,7 @@ var auto_hover_speed = {
             printf('unrecognised airground_mode: %s', airground_mode);
             return;
         }
-
+        
         var speed_target = props.globals.getValue(sprintf('/controls/auto-hover/%s-speed-target', me.name), 0);
         if (speed_target == nil or speed_target == '') {
             speed_target = speed;
@@ -439,9 +450,12 @@ var auto_hover_speed = {
             # me.t_deriv to scale.
             var daccel_target = (accel_target - accel) / me.t_deriv;
 
-            var daccel_max = 0.2*10;
-            daccel_target= clip_abs(daccel_target, daccel_max);
             var e = me.control_smoothing;
+            var correction = speed_correction();
+            var daccel_max = 2 * (1 - correction);
+            daccel_target = daccel_target * (1 - correction);
+            e = e + ( (1-e) * correction);
+            daccel_target= clip_abs(daccel_target, daccel_max);
             if (me.control_smoothed == nil) {
                 me.control = props.globals.getValue(me.control_name, 0);
                 me.control_smoothed = me.control;
@@ -457,11 +471,12 @@ var auto_hover_speed = {
 
             if (me.debug) {
                 printf(
-                        'speed: %+.5f target=%+.5f. accel: %+.5f target=%+.5f. daccel: %+.5f target=%+.5f. control: raw=%+.5f smoothed=%+.5f => new=%+.5f',
+                        'speed: %+.5f target=%+.5f. accel: %+.5f target=%+.5f max=.%+.5f daccel: %+.5f target=%+.5f. control: raw=%+.5f smoothed=%+.5f => new=%+.5f',
                         speed,
                         speed_target,
                         accel,
                         accel_target,
+                        accel_target_max,
                         daccel,
                         daccel_target,
                         me.control,
@@ -634,7 +649,7 @@ var auto_hover_rotation = {
         var active = 1;
         var mode = props.globals.getValue(me.mode_name, 0);
         
-        if ( in_replay()) {
+        if (in_replay()) {
             active = 0;
         }
         else if (mode == 'speed pid' or mode == 'heading pid') {
@@ -655,10 +670,6 @@ var auto_hover_rotation = {
                 }
             }
             else if (mode == 'heading') {
-                #if (me.mode_prev != mode) {
-                #    # Target the current heading.
-                #    me.heading_target = me.heading_get();
-                #}
                 var heading_target = props.globals.getValue('/controls/auto-hover/rotation-heading-target', 0);
                 var heading = me.heading_get();
                 var speed_target = (heading_target - heading) / me.t_deriv;
@@ -671,7 +682,6 @@ var auto_hover_rotation = {
             # Figure out how to get to speed_target.
             var speed = me.speed_get();
             var accel = (speed - me.speed_prev) / me.period;
-            #var daccel = (accel - me.accel_prev) / me.period;
 
             me.speed_prev = speed;
             me.accel_prev = accel;
@@ -680,6 +690,10 @@ var auto_hover_rotation = {
 
             # Don't try to accelerate too much - can end up unstable.
             var accel_target_max = 0.2;
+            
+            var correction = speed_correction();
+            accel_target_max = 0.2 * (1 - correction);
+            
             accel_target = clip_abs(accel_target, accel_target_max);
             var text = sprintf('auto-hover: %s:', me.name);
             if (mode == 'heading') {
@@ -699,6 +713,7 @@ var auto_hover_rotation = {
             me.window.write(text);
 
             var e = me.control_smoothing;
+            e = e + (1-e) * correction;
             var control_actual = props.globals.getValue(me.control_name);
             me.control_smoothed = (1-e) * me.control_smoothed + 0 * e * me.control + e * control_actual;
 
