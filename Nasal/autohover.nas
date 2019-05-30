@@ -310,6 +310,10 @@ var auto_hover_speed = {
             if (on_ground()) {
                 me.control_smoothed = 0;
             }
+            
+            # auto-hover AoA will disable (see Systems/Autopilot.xml) but we
+            # need to turn off our AoA display explicitly here if it was previously active.
+            auto_hover_aoa_nozzles_off();
         }
 
         var airground_mode = props.globals.getValue(sprintf('/controls/auto-hover/%s-airground-mode', me.name), 0);
