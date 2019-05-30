@@ -231,22 +231,23 @@ var auto_hover_speed = {
         
     do: func() {
         
+        var mode = props.globals.getValue(sprintf('/controls/auto-hover/%s-mode', me.name));
+        
         og = on_ground();
         if (me.on_ground and !og) {
             # Reset control if we've just left the ground.
             me.control_smoothed = 0;
         }
         
-        if (og and !me.on_ground) {
+        if (og and !me.on_ground and mode != 'target') {
             # We have just landed; disable ourselves because auto-hover
-            # horizontal is really unhelpful after landing.
-            props.globals.setValue(sprintf('/controls/auto-hover/%s-mode', me.name), 'off');
+            # horizontal speed control is really unhelpful after landing.
+            mode = 'off';
+            props.globals.setValue(sprintf('/controls/auto-hover/%s-mode', me.name), mode);
         }
         
         me.on_ground = og;
               
-        var mode = props.globals.getValue(sprintf('/controls/auto-hover/%s-mode', me.name));
-        
         if (mode == 'off' or mode == 'ground speed pid' or in_replay()) {
             # We are disabled.
             if (me.mode_prev != mode) {
