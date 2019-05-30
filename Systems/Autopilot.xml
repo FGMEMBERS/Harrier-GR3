@@ -659,7 +659,7 @@
             <prop>/controls/engines/engine/mixture</prop>
         </output>
         <config>
-            <Kp>-0.1</Kp>
+            <Kp>-0.05</Kp>
             <Ti>15</Ti>
             <Td>0.005</Td>
             <u_min>0</u_min>
