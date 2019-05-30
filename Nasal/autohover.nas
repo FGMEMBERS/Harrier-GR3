@@ -1257,7 +1257,7 @@ var auto_hover_aoa_nozzles_window = make_window( 20, 250);
 
 var auto_hover_aoa_nozzles_change = func(delta) {
     target = props.globals.getValue('/controls/auto-hover/aoa-nozzles-target');
-    if (target == nil or target == '') {
+    if (target == nil) {
         target = props.globals.getValue('/orientation/alpha-deg');
         target = math.round(target, 0.5);
     }
@@ -1268,7 +1268,7 @@ var auto_hover_aoa_nozzles_change = func(delta) {
 }
 
 var auto_hover_aoa_nozzles_off = func() {
-    props.globals.setValue('/controls/auto-hover/aoa-nozzles-target', '');
+    props.globals.getNode('/controls/auto-hover/aoa-nozzles-target').clearValue();
     auto_hover_aoa_nozzles_window.close();
 }
 
