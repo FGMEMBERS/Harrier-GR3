@@ -64,6 +64,26 @@ var on_ground = func() {
     return 0;
 }
 
+# We keep a list of our windows so we can update the fonts if the user changes
+# gui style.
+#
+var windows = [];
+
+var set_font = func(w) {
+    w.font = getprop("/sim/gui/selected-style/fonts/message-display/name");
+    w.fontsize = getprop("/sim/gui/selected-style/fonts/message-display/size");
+    #printf("w.font=%s w.fontsize=%s", view.str(w.font), view.str(w.fontsize));
+}
+    
+var set_fonts = func() {
+    foreach(var w; windows) {
+        set_font(w);
+        w._redraw_();
+    }
+}
+
+setlistener("/sim/gui/current-style", set_fonts);
+
 var make_window = func(x, y) {
     var w = screen.window.new(
         x,
@@ -74,8 +94,8 @@ var make_window = func(x, y) {
     w.bg = [0,0,0,.5]; # black alpha .5 background
     w.fg = [1, 1, 1, 0.5];
     # Setting font here doesn't appear to make any difference.
-    w.font = getprop("/sim/gui/selected-style/fonts/message-display/name") or "HELVETICA_14";;
-    w.fontsize = 8;
+    set_font(w);
+    append(windows, w);
     return w;
 }
 
