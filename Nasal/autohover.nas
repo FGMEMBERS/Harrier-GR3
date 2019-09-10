@@ -961,7 +961,9 @@ var auto_hover_height = {
             {
                 # Use target vertical speed directly.
                 var speed_target_fps = props.globals.getValue('/controls/auto-hover/y-speed');
-                speed_target = speed_target_fps * ft2si;
+                if (speed_target_fps != nil) {
+                    speed_target = speed_target_fps * ft2si;
+                }
             }
 
             # Decide on a target vertical acceleration to get us to the target
@@ -1247,12 +1249,11 @@ var auto_hover_y_speed_set = func(speed) {
 }
 
 var auto_hover_y_speed_delta = func(delta) {
-    props.globals.setValue('/controls/auto-hover/y-mode', 'speed');
     speed = props.globals.getValue('/controls/auto-hover/y-speed');
-    if (speed != nil) {
-        speed += delta;
-        props.globals.setValue('/controls/auto-hover/y-speed', speed);
-    }
+    if (speed == nil)   speed = 0;
+    speed += delta;
+    props.globals.setValue('/controls/auto-hover/y-speed', speed);
+    props.globals.setValue('/controls/auto-hover/y-mode', 'speed');
 }
 
 var auto_hover_y_off = func() {
