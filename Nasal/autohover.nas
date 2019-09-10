@@ -1249,8 +1249,10 @@ var auto_hover_y_speed_set = func(speed) {
 var auto_hover_y_speed_delta = func(delta) {
     props.globals.setValue('/controls/auto-hover/y-mode', 'speed');
     speed = props.globals.getValue('/controls/auto-hover/y-speed');
-    speed += delta;
-    props.globals.setValue('/controls/auto-hover/y-speed', speed);
+    if (speed != nil) {
+        speed += delta;
+        props.globals.setValue('/controls/auto-hover/y-speed', speed);
+    }
 }
 
 var auto_hover_y_off = func() {
