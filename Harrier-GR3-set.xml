@@ -224,8 +224,13 @@
             </key>
 
             <key>
-                <name>C/c</name>
-                <desc>Canopy open/close</desc>
+                <name>c</name>
+                <desc>Toggle cockpit view</desc>
+            </key>
+
+            <key>
+                <name>C</name>
+                <desc>Toggle canopy</desc>
             </key>
             <key>
                 <name>}</name>

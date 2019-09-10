@@ -3,8 +3,8 @@
 
     <!-- Keyboard Shortcuts -->
 
-            <key n="99">
-                <name>c</name>
+            <key n="67">
+                <name>C</name>
                 <desc>Toggle Canopy</desc>
                 <binding>
                     <command>nasal</command>
