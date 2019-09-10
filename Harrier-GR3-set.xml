@@ -196,19 +196,19 @@
             <title>Hawker Siddeley Harrier GR3</title>
             <key>
                 <name>m/M</name>
-                <desc>Thrust Vector</desc>
+                <desc>Nozzles back/down</desc>
             </key>
             <key>
                 <name>Alt-m</name>
-                <desc>Thrust Vector Hover Stop</desc>
+                <desc>Nozzles hover-stop</desc>
             </key>
             <key>
-                <name>j/k</name>
-                <desc>Air Brake</desc>
+                <name>k/j</name>
+                <desc>Air Brake increase/decrease</desc>
             </key>
             <key>
                 <name>h</name>
-                <desc>HUD</desc>
+                <desc>Toggle HUD</desc>
             </key>
             <key>
                 <name>e</name>
@@ -224,8 +224,8 @@
             </key>
 
             <key>
-                <name>c</name>
-                <desc>Canopy</desc>
+                <name>C/c</name>
+                <desc>Canopy open/close</desc>
             </key>
             <key>
                 <name>}</name>
@@ -238,12 +238,8 @@
             
             
             <key>
-                <name>Alt-Page up</name>
-                <desc>Auto-hover vertical: increment target vertical speed</desc>
-            </key>
-            <key>
-                <name>Alt-Page down</name>
-                <desc>Auto-hover vertical: decrement target vertical speed</desc>
+                <name>Alt-Page up/down</name>
+                <desc>Auto-hover vertical: +/- target vertical speed</desc>
             </key>
             <key>
                 <name>Alt-0</name>
@@ -260,23 +256,15 @@
             
             <key>
                 <name>Alt-.</name>
-                <desc>Auto-hover horizontal: Set target forwards/sideways speeds to zero</desc>
+                <desc>Auto-hover horizontal: Set target horizontal speed to zero</desc>
             </key>
             <key>
-                <name>Alt-up</name>
-                <desc>Auto-hover horizontal: Increment target forwards speed</desc>
+                <name>Alt-up/down</name>
+                <desc>Auto-hover horizontal: +/- target forwards speed</desc>
             </key>
             <key>
-                <name>Alt-down</name>
-                <desc>Auto-hover horizontal: Decrement target forwards speed</desc>
-            </key>
-            <key>
-                <name>Alt-right</name>
-                <desc>Auto-hover horizontal: Increment target rightwards speed</desc>
-            </key>
-            <key>
-                <name>Alt-left</name>
-                <desc>Auto-hover horizontal: Decrement target rightwards speed</desc>
+                <name>Alt-right/left</name>
+                <desc>Auto-hover horizontal: +/- target rightwards speed</desc>
             </key>
             <key>
                 <name>Alt-a</name>
@@ -292,16 +280,12 @@
             </key>
             
             <key>
-                <name>Alt-4</name>
-                <desc>Auto-hover rotation: increment target rotation speed to left</desc>
+                <name>Alt-4/6</name>
+                <desc>Auto-hover rotation: +/- target rotation speed to left</desc>
             </key>
             <key>
                 <name>Alt-5</name>
                 <desc>Auto-hover rotation: set target heading to current heading</desc>
-            </key>
-            <key>
-                <name>Alt-6</name>
-                <desc>Auto-hover rotation: increment target rotation speed to right</desc>
             </key>
             <key>
                 <name>Alt-r</name>
@@ -309,12 +293,8 @@
             </key>
             
             <key>
-                <name>Alt-Insert or Alt-z</name>
-                <desc>Auto-hover aoa nozzles: decrement target angle of attack</desc>
-            </key>
-            <key>
-                <name>Alt-Delete or Alt-x</name>
-                <desc>Auto-hover aoa nozzles: increment target angle of attack</desc>
+                <name>Alt-Delete/Insert or Alt-x/z</name>
+                <desc>Auto-hover aoa nozzles: +/- target angle of attack</desc>
             </key>
             <key>
                 <name>Alt-o</name>
@@ -335,7 +315,7 @@
 === Auto-hover vertical ===
 Uses throttle to control vertical height/speed.
 
-Automatically overides to avoid crash into ground.
+If active, automatically overides to avoid crash into ground.
 
 === Auto-hover horizontal ===
 Uses pitch and roll to control forwards/sideways speed.
