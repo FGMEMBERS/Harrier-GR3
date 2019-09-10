@@ -696,7 +696,10 @@ var auto_hover_rotation = {
             else if (mode == 'heading') {
                 var heading_target = props.globals.getValue('/controls/auto-hover/rotation-heading-target', 0);
                 var heading = me.heading_get();
-                var speed_target = (heading_target - heading) / me.t_deriv;
+                var heading_delta = heading_target - heading;
+                if (heading_delta > 180)    heading_delta -= 360;
+                if (heading_delta < -180)   heading_delta += 360;
+                var speed_target = heading_delta / me.t_deriv;
             }
             else {
                 printf('unrecognised mode: %s', mode);
