@@ -995,7 +995,7 @@ variant_decoder.stop();
     <animation>
         <type>spin</type>
         <object-name>Fan</object-name>
-        <property>engines/engine/n1</property>
+        <property>engines/engine/rpm</property>
         <factor>100</factor>
         <center>
             <x-m>-14.1426</x-m>
