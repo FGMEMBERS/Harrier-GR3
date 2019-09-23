@@ -2,6 +2,10 @@
 
 <PropertyList>
 
+    <input>
+        <keyboard include="Harrier-GR3-keyboard.xml"/>
+    </input>
+    
     <sim>
 
         <!-- Info -->
@@ -24,8 +28,9 @@
             <tag>refuel</tag>
             <tag>single-engine</tag>
         </tags>
-        <author>Petar Jedvaj, Andy Ross, Gary Brown, StuartC, Raptor and Brendan Black</author>
-        <status>0.3</status>
+        <author>Petar Jedvaj, Andy Ross, Gary Brown, StuartC, Raptor, Brendan Black, Julian Smith, Ludovic Brenta</author>
+        <aircraft-version>3.3</aircraft-version>
+        <status>beta</status>
         <rating>
             <FDM type="int">4</FDM>
             <systems type="int">1</systems>
@@ -44,6 +49,7 @@
         <!-- Models -->
         <model>
             <path>Aircraft/Harrier-GR3/Models/Harrier-GR3.xml</path>
+            <fallback-model-index type="int">502</fallback-model-index>
         </model>
 
         <submodels>
@@ -131,6 +137,12 @@
             </config>
         </view>
 
+        <view n="7">
+            <config>
+                <target-z-offset-m archive="y">7.8</target-z-offset-m>
+            </config>
+        </view>
+
         <view n="100">
             <name>Camera pod</name>
             <type>lookfrom</type>
@@ -184,15 +196,19 @@
             <title>Hawker Siddeley Harrier GR3</title>
             <key>
                 <name>m/M</name>
-                <desc>Thrust Vector</desc>
+                <desc>Nozzles back/down</desc>
             </key>
             <key>
-                <name>j/k</name>
-                <desc>Air Brake</desc>
+                <name>Alt-m</name>
+                <desc>Nozzles hover-stop</desc>
+            </key>
+            <key>
+                <name>k/j</name>
+                <desc>Air Brake increase/decrease</desc>
             </key>
             <key>
                 <name>h</name>
-                <desc>HUD</desc>
+                <desc>Toggle HUD</desc>
             </key>
             <key>
                 <name>e</name>
@@ -209,7 +225,12 @@
 
             <key>
                 <name>c</name>
-                <desc>Canopy</desc>
+                <desc>Toggle cockpit view</desc>
+            </key>
+
+            <key>
+                <name>C</name>
+                <desc>Toggle canopy</desc>
             </key>
             <key>
                 <name>}</name>
@@ -219,6 +240,104 @@
                 <name>q</name>
                 <desc>Flares</desc>
             </key>
+            
+            
+            <key>
+                <name>Alt-Page up/down</name>
+                <desc>Auto-hover vertical: +/- target vertical speed</desc>
+            </key>
+            <key>
+                <name>Alt-0</name>
+                <desc>Auto-hover vertical: set target vertical speed to zero</desc>
+            </key>
+            <key>
+                <name>Alt--</name>
+                <desc>Auto-hover vertical: maintain current height</desc>
+            </key>
+            <key>
+                <name>Alt-v</name>
+                <desc>Auto-hover vertical: off</desc>
+            </key>
+            
+            <key>
+                <name>Alt-.</name>
+                <desc>Auto-hover horizontal: Set target horizontal speed to zero</desc>
+            </key>
+            <key>
+                <name>Alt-up/down</name>
+                <desc>Auto-hover horizontal: +/- target forwards speed</desc>
+            </key>
+            <key>
+                <name>Alt-right/left</name>
+                <desc>Auto-hover horizontal: +/- target rightwards speed</desc>
+            </key>
+            <key>
+                <name>Alt-a</name>
+                <desc>Auto-hover horizontal: control air speed</desc>
+            </key>
+            <key>
+                <name>Alt-g</name>
+                <desc>Auto-hover horizontal: control ground speed (default)</desc>
+            </key>
+            <key>
+                <name>Alt-h</name>
+                <desc>Auto-hover horizontal: off</desc>
+            </key>
+            
+            <key>
+                <name>Alt-4/6</name>
+                <desc>Auto-hover rotation: +/- target rotation speed to left</desc>
+            </key>
+            <key>
+                <name>Alt-5</name>
+                <desc>Auto-hover rotation: set target heading to current heading</desc>
+            </key>
+            <key>
+                <name>Alt-r</name>
+                <desc>Auto-hover rotation: off</desc>
+            </key>
+            
+            <key>
+                <name>Alt-Delete/Insert or Alt-x/z</name>
+                <desc>Auto-hover aoa nozzles: +/- target angle of attack</desc>
+            </key>
+            <key>
+                <name>Alt-o</name>
+                <desc>Auto-hover aoa nozzles: off</desc>
+            </key>
+            
+            <key>
+                <name>Alt-,</name>
+                <desc>Auto-hover horizontal target: next click sets target horizontal location.</desc>
+            </key>
+            
+            <key>
+                <name>Alt-/</name>
+                <desc>Auto-hover horizontal target: target current horizontal location.</desc>
+            </key>
+
+            <text>
+=== Auto-hover vertical ===
+Uses throttle to control vertical height/speed.
+
+If active, automatically overides to avoid crash into ground.
+
+=== Auto-hover horizontal ===
+Uses pitch and roll to control forwards/sideways speed.
+
+=== Auto-hover rotation ===
+Uses rudder to control rotation speed or heading.
+
+=== Auto-hover AoA nozzles ===
+Uses nozzels to control angle-of-attack; useful if there is not enough thrust
+to hover - suitable target AoA results in as slow an approach speed as
+possible.
+
+=== Auto-hover horizontal target ===
+Allows a click on landscape to set a target horizontal position, and moves
+aircraft to this position, or targets current position. Does not affect
+altitude.
+            </text>
 
         </help>
 
@@ -298,28 +417,25 @@
             <opt><name>Matra 155 SNEB 18x68mm Rocket Pack</name><lbs>700</lbs></opt>
         </weight>
 
+        <weight n="7">
+            <name>Refueling probe</name>
+            <weight-lb>0</weight-lb>
+            <selected>none</selected>
+            <opt><name>none</name><lbs>0</lbs></opt>
+            <opt><name>Probe installed</name><lbs>35</lbs></opt>
+        </weight>
+
         <!-- Game Multiplayer -->
         <multiplay>
             <generic>
-                <int n="0" type="int">0</int>
-                <int n="1" type="int">0</int>
-                <int n="2" type="int">0</int>
-                <int n="3" type="int">0</int>
-                <int n="4" type="int">0</int>
-                <int n="5" type="int">0</int>
-                <int n="6" type="int">0</int>
-                <int n="7" type="int">0</int>
-                <int n="8" type="int">0</int>
-                <int n="9" type="int">0</int>
-                <int n="10" type="int">0</int>
-                <int n="11" type="int">0</int>
-                <int n="12" type="int">0</int>
                 <float n="0" alias="/gear/gear[0]/sprayspeed-ms"/>
                 <float n="1" alias="/gear/gear[1]/sprayspeed-ms"/>
                 <float n="2" alias="/gear/gear[2]/sprayspeed-ms"/>
                 <float n="3" alias="/gear/gear[0]/spray-density"/>
                 <float n="4" alias="/gear/gear[1]/spray-density"/>
                 <float n="5" alias="/gear/gear[2]/spray-density"/>
+                <float n="6" alias="/controls/engines/engine/mixture"/> <!-- animates nozzles -->
+                <bool n="0" alias="/controls/eject"/>
             </generic>
         </multiplay>
 
@@ -344,103 +460,13 @@
     </consumables>
 
 
-
-    <!-- Keyboard Shortcuts -->
-    <input>
-        <keyboard>
-
-            <key n="99">
-                <name>c</name>
-                <desc>Toggle Canopy</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>Canopy.canopy_switch(2)</script>
-                </binding>
-            </key>
-
-            <key n="100">
-                <name>d</name>
-                <desc>Fire rockets</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>guns.fire_Rocket()</script>
-                </binding>
-                <mod-up>
-                    <binding>
-                        <command>nasal</command>
-                        <script>guns.stop_Rocket()</script>
-                    </binding>
-                </mod-up>
-            </key>
-
-            <key n="101">
-                <name>e</name>
-                <desc>Eject</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>Eject.eject();</script>
-                </binding>
-            </key>
-
-            <key n="102">
-                <name>f</name>
-                <desc>Fire gun</desc>
-                <binding>
-                    <command>property-assign</command>
-                    <property>controls/armament/trigger</property>
-                    <value>true</value>
-                </binding>
-                <mod-up>
-                    <binding>
-                        <command>property-assign</command>
-                        <property>controls/armament/trigger</property>
-                        <value>false</value>
-                    </binding>
-                </mod-up>
-            </key>
-
-            <key n="104">
-                <name>h</name>
-                <desc>Toggle HUD</desc>
-                <binding>
-                    <command>property-toggle</command>
-                    <property>sim/hud/visibility[1]</property>
-                </binding>
-            </key>
-
-            <key n="113">
-                <name>q</name>
-                <desc>Deploy countermeasures</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>guns.fire_FL()</script>
-                </binding>
-                <mod-up>
-                    <binding>
-                        <command>nasal</command>
-                        <script>guns.stop_FL()</script>
-                    </binding>
-                </mod-up>
-            </key>
-
-            <key n="125">
-                <name>}</name>
-                <desc>Engine Autostart</desc>
-                <binding>
-                    <command>nasal</command>
-                    <script>engines.engine1.autostart();</script>
-                </binding>
-            </key>
-
-        </keyboard>
-    </input>
-
     <!-- Misc Settings -->
     <canopy>
         <position-norm type="double">0</position-norm>
     </canopy>
 
     <controls>
+        <eject type="bool">false</eject>
         <gear>
             <tailwheel-lock>false</tailwheel-lock>
             <brake-parking>1</brake-parking>
@@ -508,9 +534,9 @@
     <!-- Nasal Scripts -->
     <nasal>
         <Harrier-GR3>
-            <file>Aircraft/Harrier-GR3/Nasal/Controls.nas</file>
             <file>Aircraft/Harrier-GR3/Nasal/Liveries.nas</file>
             <file>Aircraft/Harrier-GR3/Nasal/HUD.nas</file>
+            <file>Aircraft/Harrier-GR3/Nasal/Controls.nas</file>
         </Harrier-GR3>
 
         <lights>
@@ -521,9 +547,17 @@
             <file>Aircraft/Harrier-GR3/Nasal/ENAV.nas</file>
         </ENAV>
 
+        <controls>
+            <file>Aircraft/Harrier-GR3/Nasal/Controls.nas</file>
+        </controls>
+
         <Canopy>
             <file>Aircraft/Harrier-GR3/Nasal/Canopy.nas</file>
         </Canopy>
+
+        <autohover>
+            <file>Aircraft/Harrier-GR3/Nasal/autohover.nas</file>
+        </autohover>
 
         <Eject>
             <file>Aircraft/Harrier-GR3/Nasal/eject.nas</file>

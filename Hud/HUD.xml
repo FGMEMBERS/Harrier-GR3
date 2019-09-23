@@ -33,7 +33,7 @@
 			<property>/orientation/pitch-deg</property>
 		</pitch-input>
 		<compression-factor>7.8</compression-factor>
-		<display-span>10.0</display-span>
+		<display-span>29.0</display-span>
 		<divisions>5.0</divisions>
 		<screen-hole>10</screen-hole>
 		<zero-bar-overlength>10</zero-bar-overlength>
@@ -170,7 +170,7 @@
 	<label>
 		<name>KIAS</name>
 		<x>-65</x>
-		<y>22</y>
+		<y>16</y>
 		<width>25</width>
 		<height>10</height>
 		<input>
@@ -185,7 +185,7 @@
 	<label>
 		<name>Altitude</name>
 		<x>38</x>
-		<y>22</y>
+		<y>16</y>
 		<width>24</width>
 		<height>10</height>
 		<input>
@@ -200,7 +200,7 @@
 	<label>
 		<name>AGL</name>
 		<x>38</x>
-		<y>12</y>
+		<y>6</y>
 		<width>24</width>
 		<height>10</height>
 		<input>

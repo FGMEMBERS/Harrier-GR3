@@ -1,3 +1,20 @@
+# Increment a property, constraining to min/max values, and using interpolate()
+# with specified time period.
+#
+var incrementProp = func(name, delta, min, max, t) {
+    value = getprop(name);
+    
+    # Ensure that we end up at a multiple of <delta> if we get called while
+    # property is still moving from an earlier interpolation.
+    #
+    if (delta > 0)      value = delta * math.ceil(value / delta);
+    else if (delta < 0) value = (-delta) * math.floor(value / (-delta));
+    
+    value += delta;
+    if (value < min)    value = min;
+    if (value > max)    value = max;
+    interpolate(name, value, t);
+}
 # HARRIER controls
 #  extra check to see if the harrier is carrying its AAR boom
 

@@ -90,10 +90,12 @@
         <type>select</type>
         <object-name>Camera</object-name>
         <condition>
-            <equals>
-                <property>sim/weight[3]/selected</property>
-                <value>Camera Reconnaissance Pod</value>
-            </equals>
+            <not>
+                <equals>
+                    <property>sim/weight[3]/selected</property>
+                    <value>none</value>
+                </equals>
+            </not>
         </condition>
     </animation>
 
@@ -101,10 +103,12 @@
         <type>select</type>
         <object-name>LAden</object-name>
         <condition>
-            <equals>
-                <property>sim/weight[2]/selected</property>
-                <value>ADEN 30mm Cannon</value>
-            </equals>
+            <not>
+                <equals>
+                    <property>sim/weight[2]/selected</property>
+                    <value>none</value>
+                </equals>
+            </not>
         </condition>
     </animation>
 
@@ -112,10 +116,12 @@
         <type>select</type>
         <object-name>RAden</object-name>
         <condition>
-            <equals>
-                <property>sim/weight[4]/selected</property>
-                <value>ADEN 30mm Cannon</value>
-            </equals>
+            <not>
+                <equals>
+                    <property>sim/weight[4]/selected</property>
+                    <value>none</value>
+                </equals>
+            </not>
         </condition>
     </animation>
 
@@ -124,10 +130,12 @@
         <type>select</type>
         <object-name>LTank</object-name>
         <condition>
-            <equals>
-                <property>sim/weight[1]/selected</property>
-                <value>100 Gallon Fuel Tank</value>
-            </equals>
+            <not>
+                <equals>
+                    <property>sim/weight[1]/selected</property>
+                    <value>none</value>
+                </equals>
+            </not>
         </condition>
     </animation>
 
@@ -135,10 +143,12 @@
         <type>select</type>
         <object-name>RTank</object-name>
         <condition>
-            <equals>
-                <property>sim/weight[5]/selected</property>
-                <value>100 Gallon Fuel Tank</value>
-            </equals>
+            <not>
+                <equals>
+                    <property>sim/weight[5]/selected</property>
+                    <value>none</value>
+                </equals>
+            </not>
         </condition>
     </animation>
 
@@ -147,10 +157,12 @@
         <type>select</type>
         <object-name>LSNEB</object-name>
         <condition>
-            <equals>
-                <property>sim/weight[0]/selected</property>
-                <value>Matra 155 SNEB 18x68mm Rocket Pack</value>
-            </equals>
+            <not>
+                <equals>
+                    <property>sim/weight[0]/selected</property>
+                    <value>none</value>
+                </equals>
+            </not>
         </condition>
     </animation>
 
@@ -158,10 +170,12 @@
         <type>select</type>
         <object-name>RSNEB</object-name>
         <condition>
-            <equals>
-                <property>sim/weight[6]/selected</property>
-                <value>Matra 155 SNEB 18x68mm Rocket Pack</value>
-            </equals>
+            <not>
+                <equals>
+                    <property>sim/weight[6]/selected</property>
+                    <value>none</value>
+                </equals>
+            </not>
         </condition>
     </animation>
 

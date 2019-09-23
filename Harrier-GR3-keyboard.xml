@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PropertyList>
+
+    <!-- Keyboard Shortcuts -->
+
+            <key n="67">
+                <name>C</name>
+                <desc>Toggle Canopy</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>Canopy.canopy_switch(2)</script>
+                </binding>
+            </key>
+
+            <key n="100">
+                <name>d</name>
+                <desc>Fire rockets</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>guns.fire_Rocket()</script>
+                </binding>
+                <mod-up>
+                    <binding>
+                        <command>nasal</command>
+                        <script>guns.stop_Rocket()</script>
+                    </binding>
+                </mod-up>
+            </key>
+
+            <key n="101">
+                <name>e</name>
+                <desc>Eject</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>Eject.eject();</script>
+                </binding>
+            </key>
+
+            <key n="102">
+                <name>f</name>
+                <desc>Fire gun</desc>
+                <binding>
+                    <command>property-assign</command>
+                    <property>controls/armament/trigger</property>
+                    <value>true</value>
+                </binding>
+                <mod-up>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>controls/armament/trigger</property>
+                        <value>false</value>
+                    </binding>
+                </mod-up>
+            </key>
+
+            <key n="104">
+                <name>h</name>
+                <desc>Toggle HUD</desc>
+                <binding>
+                    <command>property-toggle</command>
+                    <property>sim/hud/visibility[1]</property>
+                </binding>
+            </key>
+
+            <key n="113">
+                <name>q</name>
+                <desc>Deploy countermeasures</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>guns.fire_FL()</script>
+                </binding>
+                <mod-up>
+                    <binding>
+                        <command>nasal</command>
+                        <script>guns.stop_FL()</script>
+                    </binding>
+                </mod-up>
+            </key>
+
+            <key n="125">
+                <name>}</name>
+                <desc>Engine Autostart</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>engines.engine1.autostart();</script>
+                </binding>
+            </key>
+
+            <key n="91">
+                <name>[</name>
+                <desc>Decrease flaps</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>controls.incrementProp('/controls/flight/flaps', -0.25, 0, 1, 0.25);</script>
+                </binding>
+            </key>
+
+            <key n="93">
+                <name>]</name>
+                <desc>Increase flaps</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>controls.incrementProp('/controls/flight/flaps', 0.25, 0, 1, 0.25);</script>
+                </binding>
+            </key>
+
+            <key n="106">
+                <name>j</name>
+                <desc>Decrease spoilers</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>controls.incrementProp('/controls/flight/spoilers', -0.25, 0, 1, 0.25);</script>
+                </binding>
+            </key>
+
+            <key n="107">
+                <name>k</name>
+                <desc>Increase spoilers</desc>
+                <binding>
+                    <command>nasal</command>
+                    <script>controls.incrementProp('/controls/flight/spoilers', 0.25, 0, 1, 0.25);</script>
+                </binding>
+            </key>
+
+            <!-- Alt-m moves thrust vector (aka mixture) to hover stop, 82 deg. -->
+            <key n="109">
+                <mod-alt>
+                    <name>Alt-m</name>
+                    <desc>Hover stop</desc>
+                    <binding>
+                        <command>property-interpolate</command>
+                        <property>controls/engines/engine/mixture</property>
+                        <value>0.18</value>
+                        <time>1.0</time>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <!-- Auto-hover y (vertical) -->
+            <key n="118">
+                <name>Alt-v</name>
+                <desc>Auto-hover y: off</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_off()</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="48">
+                <name>Alt-0</name>
+                <desc>Auto-hover y: set target to zero fps</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_speed_set(0)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="45">
+                <name>Alt--</name>
+                <desc>Auto-hover y: maintain current height</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_current()</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <key n="360">
+                <name>Alt-page up</name>
+                <desc>Auto-hover y: increment</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_speed_delta(1)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <key n="361">
+                <name>Alt-page down</name>
+                <desc>Auto-hover y: decrement</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_y_speed_delta(-1)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <!-- Auto-hover xz (horizontal) -->
+            <key n="104">
+                <name>Alt-h</name>
+                <desc>Auto-hover xz off</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/x-mode</property>
+                        <value>off</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/z-mode</property>
+                        <value>off</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="97">
+                <name>Alt-a</name>
+                <desc>Auto-hover xz: air speed</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/x-airground-mode</property>
+                        <value>air</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/z-airground-mode</property>
+                        <value>air</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="103">
+                <name>Alt-g</name>
+                <desc>Auto-hover xz: ground speed</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/x-airground-mode</property>
+                        <value>ground</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/z-airground-mode</property>
+                        <value>ground</value>
+                    </binding>
+                    <mod-shift>
+                        <binding>
+                            <command>property-assign</command>
+                            <property>/controls/auto-hover/x-mode</property>
+                            <value>speed pid</value>
+                        </binding>
+                        <binding>
+                            <command>property-assign</command>
+                            <property>/controls/auto-hover/z-mode</property>
+                            <value>speed pid</value>
+                        </binding>
+                    </mod-shift>
+                </mod-alt>
+            </key>
+            <key n="46">
+                <name>Alt-.</name>
+                <desc>Auto-hover xz: stationary</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/x-mode</property>
+                        <value>speed</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/z-mode</property>
+                        <value>speed</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/x-speed-target</property>
+                        <value>0</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/z-speed-target</property>
+                        <value>0</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="44">
+                <name>Alt-,</name>
+                <desc>Auto-hover xz: target click position</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_xz_target_click()</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="47">
+                <name>Alt-/</name>
+                <desc>Auto-hover xz: target current position</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/xz-target</property>
+                        <value>current</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="357">
+                <name>Alt-up</name>
+                <desc>Auto-hover z: increment</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/z-mode</property>
+                        <value>speed</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/z-speed-target-delta</property>
+                        <value>0.5</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="359">
+                <name>Alt-down</name>
+                <desc>Auto-hover z: decrement</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/z-mode</property>
+                        <value>speed</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/z-speed-target-delta</property>
+                        <value>-0.5</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="356">
+                <name>Alt-left</name>
+                <desc>Auto-hover x: increment</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/x-mode</property>
+                        <value>speed</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/x-speed-target-delta</property>
+                        <value>-0.5</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="358">
+                <name>Alt-right</name>
+                <desc>Auto-hover x: decrement</desc>
+                <mod-alt>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/x-mode</property>
+                        <value>speed</value>
+                    </binding>
+                    <binding>
+                        <command>property-assign</command>
+                        <property>/controls/auto-hover/x-speed-target-delta</property>
+                        <value>0.5</value>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <!-- Auto-hover rotation -->
+            <key n="114">
+                <name>Alt-r</name>
+                <desc>Auto-hover rotation: off</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_rotation_off()</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="52">
+                <name>Alt-4</name>
+                <desc>Auto-hover rotation: accelerate left</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_rotation_change(-1)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            <key n="53">
+                <name>Alt-5</name>
+                <desc>Auto-hover rotation: keep current</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_rotation_current_heading()</script>
+                    </binding>
+                    <mod-shift>
+                        <binding>
+                            <command>nasal</command>
+                            <script>autohover.auto_hover_rotation_current_heading_pid()</script>
+                        </binding>
+                    </mod-shift>
+                </mod-alt>
+            </key>
+            <key n="54">
+                <name>Alt-6</name>
+                <desc>Auto-hover rotation: accelerate right</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_rotation_change(1)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <key n="54">
+                <name>Alt-6</name>
+                <desc>Auto-hover rotation: accelerate right</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_rotation_change(1)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <!-- AoA -->
+            <key n="127">
+                <name>Alt-Delete</name>
+                <desc>Auto-hover aoa: increment target AoA</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_aoa_nozzles_change(0.5)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <key n="120">
+                <name>Alt-x</name>
+                <desc>Auto-hover aoa: increment target AoA</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_aoa_nozzles_change(0.5)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <key n="364">
+                <name>Alt-Insert</name>
+                <desc>Auto-hover aoa: decrement target AoA</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_aoa_nozzles_change(-0.5)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <key n="122">
+                <name>Alt-z</name>
+                <desc>Auto-hover aoa: decrement target AoA</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_aoa_nozzles_change(-0.5)</script>
+                    </binding>
+                </mod-alt>
+            </key>
+            
+            <key n="111">
+                <name>Alt-o</name>
+                <desc>Auto-hover aoa: off</desc>
+                <mod-alt>
+                    <binding>
+                        <command>nasal</command>
+                        <script>autohover.auto_hover_aoa_nozzles_off()</script>
+                    </binding>
+                </mod-alt>
+            </key>
+
+</PropertyList>

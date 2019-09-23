@@ -451,4 +451,243 @@
   </pid-controller>
 
 
+    <!--
+    Auto-hover forwards speed.
+    -->
+    <filter>
+        <name>Auto-hover: forwards ground-speed to forwards speed error</name>
+        <enable>
+            <condition>
+                <equals>
+                    <property>/controls/auto-hover/xz-mode</property>
+                    <value>ground speed pid</value>
+                </equals>
+            </condition>
+        </enable>
+        <debug>false</debug>
+        <type>gain</type>
+        <input>/velocities/uBody-fps</input>
+        <gain>0.5924835</gain>
+        <output>/controls/auto-hover/z-speed</output>
+    </filter>
+    
+    <filter>
+        <enable>
+            <condition>
+                <equals>
+                    <property>/controls/auto-hover/xz-mode</property>
+                    <value>ground speed pid</value>
+                </equals>
+            </condition>
+        </enable>
+        <name>Auto-hover: accel</name>
+        <type>derivative</type>
+        <input>/controls/auto-hover/z-speed</input>
+        <output>/controls/auto-hover/z-accel</output>
+        <filter-time>1.0</filter-time>
+    </filter>
+    
+    <filter>
+        <enable>
+            <condition>
+                <equals>
+                    <property>/controls/auto-hover/xz-mode</property>
+                    <value>ground speed pid</value>
+                </equals>
+            </condition>
+        </enable>
+        <name>Auto-hover: daccel</name>
+        <type>derivative</type>
+        <input>/controls/auto-hover/z-accel</input>
+        <output>/controls/auto-hover/z-daccel</output>
+        <filter-time>1.0</filter-time>
+    </filter>
+    
+    <filter>
+        <enable>
+            <condition>
+                <equals>
+                    <property>/controls/auto-hover/xz-mode</property>
+                    <value>ground speed pid</value>
+                </equals>
+            </condition>
+        </enable>
+        <name>Auto-hover: accel target</name>
+        <type>gain</type>
+        <input>/controls/auto-hover/z-target</input>
+        <reference>/controls/auto-hover/z-speed</reference>
+        <output>/controls/auto-hover/z-accel-target</output>
+        <gain>0.1</gain>
+        <max>2.0</max>
+        <min>-2.0</min>
+    </filter>
+    
+    <filter>
+        <enable>false</enable>
+        <name>Auto-hover: daccel target</name>
+        <type>gain</type>
+        <reference>/controls/auto-hover/z-accel-target</reference>
+        <input>/controls/auto-hover/z-accel</input>
+        <output>/controls/auto-hover/z-daccel-target</output>
+        <gain>-0.3</gain>
+        <max>1</max>
+        <min>-1</min>
+    </filter>
+    
+    <pid-controller>
+        <name>Auto-hover: . to elevator</name>
+        <enable>
+            <condition>
+                <equals>
+                    <property>/controls/auto-hover/xz-mode</property>
+                    <value>ground speed pid</value>
+                </equals>
+            </condition>
+        </enable>
+        <debug>false</debug>
+        <input>/controls/auto-hover/z-accel</input>
+        <reference>/controls/auto-hover/z-accel-target</reference>
+        <output>/controls/flight/elevator-</output>
+        <config>
+            <Kp>0.4</Kp>
+            <Ti>100</Ti>
+            <Td>0.0</Td>
+            <u_min>-1.0</u_min>
+            <u_max>1.0</u_max>
+        </config>
+    </pid-controller>
+    
+ 
+    <!--
+    Auto-hover rotation.
+    -->
+ 
+    <filter>
+        <name>Auto-hover: convert rotation-heading-target to rotation-heading-error</name>
+        <enable>
+            <condition>
+                <equals>
+                    <property>/controls/auto-hover/rotation-mode</property>
+                    <value>heading pid</value>
+                </equals>
+            </condition>
+        </enable>
+        <debug>false</debug>
+        <type>gain</type>
+        <gain>1.0</gain>
+        <input>/controls/auto-hover/rotation-heading-target</input>
+        <reference>/orientation/heading-deg</reference>
+        <output>/controls/auto-hover/rotation-heading-error</output>
+        <period>
+             <min>-180</min>
+             <max>180</max>
+        </period>
+    </filter>
+ 
+    <filter>
+        <name>Auto-hover: convert rotation-heading-error to rotation-speed-target</name>
+        <enable>
+            <condition>
+                <equals>
+                    <property>/controls/auto-hover/rotation-mode</property>
+                    <value>heading pid</value>
+                </equals>
+            </condition>
+        </enable>
+        <type>gain</type>
+        <gain>1.0</gain>
+        <input>/controls/auto-hover/rotation-heading-error</input>
+        <output>/controls/auto-hover/rotation-speed-target</output>
+        <gain>0.1</gain>
+        <min>-10</min>
+        <max>10</max>
+    </filter>
+
+    <pid-controller>
+        <name>Auto-hover: convert rotation-speed-target to rudder</name>
+        <enable>
+            <condition>
+                <or>
+                    <equals>
+                        <property>/controls/auto-hover/rotation-mode</property>
+                        <value>heading pid</value>
+                    </equals>
+                    <equals>
+                        <property>/controls/auto-hover/rotation-mode</property>
+                        <value>speed pid</value>
+                    </equals>
+                </or>
+            </condition>
+        </enable>
+        <debug>false</debug>
+        <input>
+            <prop>/orientation/yaw-rate-degps</prop>
+        </input>
+        <reference>
+            <prop>/controls/auto-hover/rotation-speed-target</prop>
+        </reference>
+        <output>
+            <prop>/controls/flight/rudder</prop>
+        </output>
+        <config>
+            <Kp>0.01</Kp>
+            <Ti>1</Ti>
+            <Td>0.0</Td>
+            <u_min>-1.0</u_min>
+            <u_max>1.0</u_max>
+        </config>
+    </pid-controller>
+
+    <pid-controller>
+        <name>Nozzle aoa: control angle-of-attach with nozzles</name>
+        <enable>
+            <condition>
+                <and>
+                    <not-equals>
+                        <property>/controls/auto-hover/aoa-nozzles-target</property>
+                        <value></value>
+                    </not-equals>
+                    <equals>
+                        <property>/gear/gear[1]/wow</property>
+                        <value>false</value>
+                    </equals>
+                </and>
+            </condition>
+        </enable>
+        <debug>false</debug>
+        <input>
+            <!--
+            We primarily target AoA, /orientation/alpha-deg, but we multiply
+            by cos(roll-deg) to crudely attempt to look at only the vertical
+            component of the AoA; this reduces unhelpful increases in speed via
+            nozzles when we are turning.
+            -->
+            <expression>
+                <product>
+                    <cos>
+                        <product>
+                            <property>/orientation/roll-deg</property>
+                            <value>0.01745329</value>
+                        </product>
+                    </cos>
+                    <property>/orientation/alpha-deg</property>
+                    <value>1</value>
+                </product>
+            </expression>
+        </input>
+        <reference>
+            <property>/controls/auto-hover/aoa-nozzles-target</property>
+        </reference>
+        <output>
+            <prop>/controls/engines/engine/mixture</prop>
+        </output>
+        <config>
+            <Kp>-0.05</Kp>
+            <Ti>15</Ti>
+            <Td>0.005</Td>
+            <u_min>0</u_min>
+            <u_max>1.0</u_max>
+        </config>
+    </pid-controller>
+
 </PropertyList>
